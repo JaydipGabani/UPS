@@ -72,6 +72,7 @@ public class Main {
     }
 
     private void changeStudentVehicleList() {
+//        String permitNumber, int univId, boolean addOrRemove, String make, String model, String year, String color, String vehicleNumber
         System.out.println("changeStudentVehicleList");
     }
 
@@ -99,7 +100,7 @@ public class Main {
             int u = input.nextInt();
             switch (u){
                 case 1:
-                    this.issueCitaion();
+                    this.issueCitation();
                     break;
                 case 2:
                     this.addLot();
@@ -133,35 +134,43 @@ public class Main {
     }
 
     private void changeEmpVehicleList() {
+//        String permitNumber, int univId, boolean addOrRemove, String make, String model, String year, String color, String vehicleNumber
         System.out.println("changeRmpVehicleList");
     }
 
     private void checkNVValidParking() {
-        System.out.println("check");
+//        String currentTime, java.sql.Date date, String lotName, String type, String licensePlate
+        System.out.println("checkNVValidParking");
     }
 
     private void checkVValidParking() {
-        System.out.println("check2");
+//        String currentTime, java.sql.Date date, String lotName, int spaceNumber, String type, String licensePlate
+        System.out.println("checkVValidParking");
     }
 
     private void assignPermit() {
-        System.out.println("ap");
+//        int univId, String zone, String type, String vehicleNumber
+        System.out.println("assignPermit");
     }
 
     private void assignTypeToSpace() {
-        System.out.println("atts");
+//        String lotName, int spaceNumber, String type
+        System.out.println("assignTypeToSpace");
     }
 
     private void assignZoneToLot() {
-        System.out.println("aztl");
+//        String name, String Designation, int numberOfSpaces, int beginNumber
+        System.out.println("assignZoneToLot");
     }
 
     private void addLot() {
-        System.out.println("al");
+//        String name, String address, int numberOfSpaces, int beginNumber, String initialDesignation
+        System.out.println("addLot");
     }
 
-    private void issueCitaion() {
-        System.out.println("ic");
+    private void issueCitation() {
+//        String licensePlate, String violationCategory
+        System.out.println("issueCitation");
     }
 
     public void visitorFunction(){
@@ -169,6 +178,7 @@ public class Main {
         while(true){
             System.out.println("1. exitLot");
             System.out.println("2. PayCitation");
+            System.out.println("3. getVisitorPermit");
             System.out.println("Any other number to go back");
             int u = input.nextInt();
             switch (u){
@@ -178,23 +188,33 @@ public class Main {
                 case 2:
                     this.payCitation();
                     break;
+                case 3:
+                    this.getVisitorPermit();
                 default:
                     return;
             }
         }
     }
 
+    private void getVisitorPermit() {
+//        String licensePlate, String type, String lotName, String duration
+        System.out.println("getVisitorPermit");
+    }
+
     private void payCitation() {
+//        String citationNumber
         System.out.println("paycitation");
     }
 
     private void exitLot() {
+//        String permitNumber
         System.out.println("exitLot");
     }
 
     public void setupSchema(){
         System.out.println("all the tables are ready");
     }
+
     public static void main(String[] args) {
 	// write your code here
         Scanner input = new Scanner(System.in);
