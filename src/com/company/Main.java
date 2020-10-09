@@ -127,7 +127,19 @@ public class Main {
 
     private void changeStudentVehicleList() {
 //        String permitNumber, int univId, boolean addOrRemove, String make, String model, String year, String color, String vehicleNumber
-        System.out.println("changeStudentVehicleList");
+        try {
+            System.out.println("changeStudentVehicleList");
+            String carmanufacturer = in.nextLine();
+            String model = in.nextLine();
+            int year = in.nextInt();
+            String color = in.nextLine();
+            String vehiclenumber = in.nextLine();
+            String query = "Update Permit P SET P.car_manufacturer = '" + carmanufacturer + "', P.model = '" + model + "', P.year = '" + year + "', P.color = '" + color + "', P.vehicle_number = '" + vehiclenumber + "' WHERE P.permit_id = '" + permitId + "'";
+            this.stmt.executeUpdate(query);
+            System.out.println("Updated the Student's Vehicle List");
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
     }
 
 
@@ -271,6 +283,7 @@ public class Main {
     public void setupSchema(){
 
         try{
+
 //            this.stmt.executeQuery("drop table Notification");
 //            this.stmt.executeQuery("drop table Citation");
 //            this.stmt.executeQuery("drop table Spaces");
@@ -335,8 +348,8 @@ public class Main {
             }// nothing we can do
 
         }//end try
-        System.out.println("Goodbye!");
-        System.out.println("all the tables are ready");
+        //System.out.println("Goodbye!");
+        System.out.println("All the tables are ready");
     }
 
     public static void main(String[] args) throws SQLException {
@@ -346,7 +359,7 @@ public class Main {
         o.setupSchema();
         while(true) {
             System.out.println("Who are you?");
-            System.out.println("1. UPS");
+            System.out.println("1. UPS Employee");
             System.out.println("2. Student");
             System.out.println("3. Employee");
             System.out.println("4. Visitor");
