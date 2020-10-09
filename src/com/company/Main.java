@@ -7,11 +7,13 @@ import java.sql.*;
 
 public class Main {
     public Statement stmt = null;
+    public Connection conn = null;
+    public static String permitId = null;
+    public static Scanner in = new Scanner(System.in);
 
     public Main(){
         String jdbcURL
                 = "jdbc:oracle:thin:@orca.csc.ncsu.edu:1521:orcl01";
-        Connection conn = null;
         try {
             Class.forName("oracle.jdbc.OracleDriver");
 
@@ -20,12 +22,12 @@ public class Main {
 
 
             ResultSet rs = null;
-            conn = DriverManager.getConnection(jdbcURL, user, passwd);
+            this.conn = DriverManager.getConnection(jdbcURL, user, passwd);
 
             // Create a statement object that will be sending your
             // SQL statements to the DBMS
 
-            this.stmt = conn.createStatement();
+            this.stmt = this.conn.createStatement();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException throwables) {
@@ -35,9 +37,10 @@ public class Main {
     public void loginEmployee(int u){
         Scanner input = new Scanner(System.in);
         System.out.println("Enter your univid");
-        //int uni = input.nextInt();
-        //this.login(uni);
-        this.employeeFunction();
+        int uni = input.nextInt();
+        if (this.login(uni)) {
+            this.employeeFunction();
+        }
     }
 
     private void employeeFunction() {
@@ -63,22 +66,43 @@ public class Main {
     public void loginUPS(int u){
         Scanner input = new Scanner(System.in);
         System.out.println("Enter your univid");
-        //int uni = input.nextInt();
-        //this.login(uni);
-        this.upsFunctions();
+        int uni = input.nextInt();
+        if (this.login(uni)){
+            this.upsFunctions();
+        }
 
     }
 
     public void loginStudent(int u){
         Scanner input = new Scanner(System.in);
         System.out.println("Enter your univid");
-        //int uni = input.nextInt();
-        //this.login(uni);
-        this.studentFunction();
+        int uni = input.nextInt();
+        if (this.login(uni)) {
+            this.studentFunction();
+        }
     }
 
-    private void login(int uni) {
-        // login logic
+    private boolean login(int uni) {
+        // login logicNon_Visitor
+        try{
+            String s = "select permit_id from Non_Visitor where unvid = " + uni;
+            ResultSet rs = this.stmt.executeQuery(s);
+            if(rs.next() == false){
+                System.out.println("User doesn't exists");
+                return false;
+            }
+            else {
+                while(rs.next()){
+                    permitId = rs.getString("permit_id");
+                    System.out.println(permitId);
+                    break;
+                }
+            }
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     private void studentFunction() {
@@ -201,6 +225,7 @@ public class Main {
     private void issueCitation() {
 //        String licensePlate, String violationCategory
         System.out.println("issueCitation");
+
     }
 
     public void visitorFunction(){
@@ -246,10 +271,15 @@ public class Main {
     public void setupSchema(){
 
         try{
-
-
-
-            String citation_table = "CREATE TABLE Citation (citation_time TIMESTAMP(0), citation_date DATE, car_license_nunber VARCHAR(50), citation_no NUMBER(10, 0) NOT NULL, violation_category VARCHAR(5), fees NUMBER(10, 0), PRIMARY KEY (citation_no))";
+//            this.stmt.executeQuery("drop table Notification");
+//            this.stmt.executeQuery("drop table Citation");
+//            this.stmt.executeQuery("drop table Spaces");
+//            this.stmt.executeQuery("drop table Parking_Lots");
+//            this.stmt.executeQuery("drop table Non_visitor");
+//            this.stmt.executeQuery("drop table Visitor");
+//            this.stmt.executeQuery("drop table Permit");
+            String citation_table = "CREATE TABLE Citation (citation_time TIMESTAMP(0), citation_date DATE, car_license_number VARCHAR(50), citation_no NUMBER(10,0) NOT NULL, violation_category VARCHAR(5), fees NUMBER(10, 0), PRIMARY KEY (citation_no))";
+            String citation_seq = "CREATE SEQUENCE Citation_seq START WITH 1 INCREMENT BY 1";
             String notification_table = "CREATE TABLE Notification (citation_no number(10,0) NOT NULL, NotificationNumber NUMBER(10, 0) NOT NULL, PhoneNumber NUMBER(10, 0) NOT NULL, PRIMARY KEY (NotificationNumber), FOREIGN KEY(citation_no) REFERENCES Citation (citation_no) ON DELETE CASCADE)";
             //String vehicle_table = "CREATE TABLE Vehicle (car_manufacturer VARCHAR(20), model VARCHAR(10), year NUMBER(10, 0), color CHAR(20), vehicle_number NUMBER(10, 0), PRIMARY KEY (vehicle_number) ON DELETE CASCADE)";
             String parking_lot_table = "CREATE TABLE Parking_Lots (zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (name, zone_designation, address))";
@@ -271,14 +301,14 @@ public class Main {
 //            String owns2_relation = "CREATE TABLE Owns2(unvid INT, permit_id INT, vehicle_number INT, PRIMARY KEY (unvid, permit_id, vehicle_number), FOREIGN KEY (unvid, permit_id) REFERENCES Student(unvid, permit_id), FOREIGN KEY (vehicle_number) REFERENCES Vehicle(vehicle_number))";
             //String assigned_relation = "CREATE TABLE Assigned(permit_id INT,space_number VARCHAR(20), name VARCHAR(20), PRIMARY KEY(permit_id, space_number), FOREIGN KEY (space_number, permit_id) REFERENCES Visitor(space_number, permit_id), FOREIGN KEY (name) REFERENCES Parking_lots(name))";
             //String made_of_relation = "CREATE TABLE made_of(space_number INT NOT NULL, zone VARCHAR(10), designated_type VARCHAR(5), name VARCHAR(20) PRIMARY KEY (name, space_number), FOREIGN KEY (name) REFERENCES Parking_Lots )";
-            this.stmt.executeUpdate(citation_table);
-            this.stmt.executeUpdate(notification_table);
+//            this.stmt.executeUpdate(citation_table);
+//            this.stmt.executeUpdate(notification_table);
 //            this.stmt.executeUpdate(vehicle_table);
-            this.stmt.executeUpdate(parking_lot_table);
-            this.stmt.executeUpdate(spaces_tables);
-            this.stmt.executeUpdate(permit_table);
-            this.stmt.executeUpdate(non_visitor_table);
-            this.stmt.executeUpdate(visitor_table);
+//            this.stmt.executeUpdate(parking_lot_table);
+//            this.stmt.executeUpdate(spaces_tables);
+//            this.stmt.executeUpdate(permit_table);
+//            this.stmt.executeUpdate(non_visitor_table);
+//            this.stmt.executeUpdate(visitor_table);
             //this.stmt.executeUpdate(employee_table);
             //this.stmt.executeUpdate(student_table);
             //this.stmt.executeUpdate(notify_relation);
@@ -288,7 +318,7 @@ public class Main {
             //this.stmt.executeUpdate(owns2_relation);
 //            this.stmt.executeUpdate(assigned_relation);
             //STEP 5: Extract data from result set
-
+            this.stmt.execute(citation_seq);
 
         }catch(SQLException se){
             //Handle errors for JDBC
@@ -313,7 +343,7 @@ public class Main {
 	// write your code here
         Scanner input = new Scanner(System.in);
         Main o = new Main();
-        //o.setupSchema();
+        o.setupSchema();
         while(true) {
             System.out.println("Who are you?");
             System.out.println("1. UPS");
