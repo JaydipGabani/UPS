@@ -7,11 +7,13 @@ import java.sql.*;
 
 public class Main {
     public Statement stmt = null;
+    public Connection conn = null;
+    public static String permitId = null;
+    public static Scanner in = new Scanner(System.in);
 
-    public Main(){
+    public Main() {
         String jdbcURL
                 = "jdbc:oracle:thin:@orca.csc.ncsu.edu:1521:orcl01";
-        Connection conn = null;
         try {
             Class.forName("oracle.jdbc.OracleDriver");
 
@@ -107,7 +109,7 @@ public class Main {
     }
 
 
-    public void upsFunctions(){
+    public void upsFunctions() throws SQLException {
         //issueCitation()
         //addLot()
         //assignZoneToLot
@@ -163,8 +165,48 @@ public class Main {
         }
     }
 
-    private void changeEmpVehicleList() {
-//        String permitNumber, int univId, boolean addOrRemove, String make, String model, String year, String color, String vehicleNumber
+    private void changeEmpVehicleList() throws SQLException {
+//        String permitNumber, int univId, boolean addOrRemove, String make, String model, int year, String color, String vehicleNumber
+        System.out.println("Do you want to add or remove a vehicle(a/r)?: ");
+        String option = in.nextLine();
+        if (option.equals("a")) {
+            ResultSet rs = this.stmt.executeQuery("SELECT * FROM Non_Visitor WHERE permit_id IS LIKE `"+ permitId+"`");
+            int size = 0;
+            if (rs != null) {
+                rs.last();
+                size = rs.getRow();
+            }
+            if (size < 5) {
+                System.out.println("Enter the make of your car: ");
+                String car_manufacturer = in.nextLine();
+                System.out.println("Enter the model of your car: ");
+                String model = in.nextLine();
+                System.out.println("Enter the year of your car: ");
+                int year = in.nextInt();
+                System.out.println("Enter the color of your car: ");
+                String color = in.nextLine();
+                System.out.println("Enter the vehicle number of your car: ");
+                String vehicleNumber = in.nextLine();
+                rs = this.stmt.executeQuery("SELECT * FROM Permit WHERE permit_id IS LIKE `"+ permitId+"`");
+                if (rs.next()) {
+                    String zone = rs.getString("zone");
+                    String start_date = rs.getString("start_date");
+                    String space_type = rs.getString("space_type");
+                    String expiry_date = rs.getString("expiry_date");
+                    String expiry_time = rs.getString("expiry_time");
+                    this.stmt.executeUpdate("INSERT INTO Permit VALUES("+permitId+","+zone+","
+                            +start_date+","+space_type+","+expiry_date+","+expiry_time+","
+                            +car_manufacturer+","+model+","+year+","+color+","+vehicleNumber+")");
+                }
+            } else {
+                System.out.println("The user already has 5 cars. Please remove one before adding any more.");
+            }
+        } else if (option.equals("r")) {
+            ResultSet rs = this.stmt.executeQuery("SELECT * FROM Non_Visitor WHERE permit_id IS LIKE `"+ permitId+"`");
+            System.out.println("Enter the vehicle number that you want to remove: ");
+            String vehicleNumber = in.nextLine();
+            this.stmt.executeUpdate("DELETE FROM Permit WHERE vehicle_number IS LIKE `"+vehicleNumber+"`");
+        }
         System.out.println("changeRmpVehicleList");
     }
 
@@ -246,9 +288,6 @@ public class Main {
     public void setupSchema(){
 
         try{
-
-
-
             String citation_table = "CREATE TABLE Citation (citation_time TIMESTAMP(0), citation_date DATE, car_license_nunber VARCHAR(50), citation_no NUMBER(10, 0) NOT NULL, violation_category VARCHAR(5), fees NUMBER(10, 0), PRIMARY KEY (citation_no))";
             String notification_table = "CREATE TABLE Notification (citation_no number(10,0) NOT NULL, NotificationNumber NUMBER(10, 0) NOT NULL, PhoneNumber NUMBER(10, 0) NOT NULL, PRIMARY KEY (NotificationNumber), FOREIGN KEY(citation_no) REFERENCES Citation (citation_no) ON DELETE CASCADE)";
             //String vehicle_table = "CREATE TABLE Vehicle (car_manufacturer VARCHAR(20), model VARCHAR(10), year NUMBER(10, 0), color CHAR(20), vehicle_number NUMBER(10, 0), PRIMARY KEY (vehicle_number) ON DELETE CASCADE)";
