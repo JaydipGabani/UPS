@@ -7,7 +7,7 @@ import java.sql.*;
 
 public class Main {
     public Statement stmt = null;
-
+    public static Scanner in = new Scanner(System.in);
     public Main(){
         String jdbcURL
                 = "jdbc:oracle:thin:@orca.csc.ncsu.edu:1521:orcl01";
@@ -104,6 +104,14 @@ public class Main {
     private void changeStudentVehicleList() {
 //        String permitNumber, int univId, boolean addOrRemove, String make, String model, String year, String color, String vehicleNumber
         System.out.println("changeStudentVehicleList");
+         String carmanufacturer = in.nextLine();
+         String model = in.nextLine();
+         int year = in.nextInt();
+         String color = in.nextLine();
+         String vehiclenumber = in.nextLine();
+        String query = "Update Permit P SET P.car_manufacturer = '" + carmanufacturer + "', P.model = '" + model +"', P.year = '"+year+"', P.color = '" + color +"', P.vehicle_number = '" +vehiclenumber+"' WHERE P.permit_id = '"+permitId+"'";
+        this.stmt.executeUpdate(query);
+        System.out.println("Updated the Student's Vehicle List");
     }
 
 
@@ -249,7 +257,7 @@ public class Main {
 
 
 
-            String citation_table = "CREATE TABLE Citation (citation_time TIMESTAMP(0), citation_date DATE, car_license_nunber VARCHAR(50), citation_no NUMBER(10, 0) NOT NULL, violation_category VARCHAR(5), fees NUMBER(10, 0), PRIMARY KEY (citation_no))";
+            String citation_table = "CREATE TABLE Citation (citation_time TIMESTAMP(0), citation_date DATE, car_license_nunber VARCHAR(50), citation_no NUMBER(10, 0) NOT NULL, violation_category VARCHAR(5), paid_flag VARCHAR(2), fees NUMBER(10, 0), PRIMARY KEY (citation_no))";
             String notification_table = "CREATE TABLE Notification (citation_no number(10,0) NOT NULL, NotificationNumber NUMBER(10, 0) NOT NULL, PhoneNumber NUMBER(10, 0) NOT NULL, PRIMARY KEY (NotificationNumber), FOREIGN KEY(citation_no) REFERENCES Citation (citation_no) ON DELETE CASCADE)";
             //String vehicle_table = "CREATE TABLE Vehicle (car_manufacturer VARCHAR(20), model VARCHAR(10), year NUMBER(10, 0), color CHAR(20), vehicle_number NUMBER(10, 0), PRIMARY KEY (vehicle_number) ON DELETE CASCADE)";
             String parking_lot_table = "CREATE TABLE Parking_Lots (zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (name, zone_designation, address))";
@@ -305,8 +313,8 @@ public class Main {
             }// nothing we can do
 
         }//end try
-        System.out.println("Goodbye!");
-        System.out.println("all the tables are ready");
+        //System.out.println("Goodbye!");
+        System.out.println("All the tables are ready");
     }
 
     public static void main(String[] args) throws SQLException {
@@ -316,7 +324,7 @@ public class Main {
         //o.setupSchema();
         while(true) {
             System.out.println("Who are you?");
-            System.out.println("1. UPS");
+            System.out.println("1. UPS Employee");
             System.out.println("2. Student");
             System.out.println("3. Employee");
             System.out.println("4. Visitor");
