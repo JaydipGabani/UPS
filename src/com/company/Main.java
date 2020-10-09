@@ -1,7 +1,11 @@
 package com.company;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.*;
-public class Main {
+import java.sql.*;
 
+public class Main {
     public void loginEmployee(int u){
         Scanner input = new Scanner(System.in);
         System.out.println("Enter your univid");
@@ -212,6 +216,30 @@ public class Main {
     }
 
     public void setupSchema(){
+        String jdbcURL
+                = "jdbc:oracle:thin:@orca.csc.ncsu.edu:1521:orcl01";
+        try{
+            Class.forName("oracle.jdbc.OracleDriver");
+
+            String user = "jgabani";	// For example, "jsmith"
+            String passwd = "abcd1234";	// Your 9 digit student ID number
+
+
+            Connection conn = null;
+            Statement stmt = null;
+            ResultSet rs = null;
+            conn = DriverManager.getConnection(jdbcURL, user, passwd);
+
+            // Create a statement object that will be sending your
+            // SQL statements to the DBMS
+
+            stmt = conn.createStatement();
+
+
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
+
         System.out.println("all the tables are ready");
     }
 
