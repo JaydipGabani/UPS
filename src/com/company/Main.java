@@ -14,6 +14,7 @@ public class Main {
     public Main() {
         String jdbcURL
                 = "jdbc:oracle:thin:@orca.csc.ncsu.edu:1521:orcl01";
+        Connection conn = null;
         try {
             Class.forName("oracle.jdbc.OracleDriver");
 
@@ -22,12 +23,12 @@ public class Main {
 
 
             ResultSet rs = null;
-            conn = DriverManager.getConnection(jdbcURL, user, passwd);
+            this.conn = DriverManager.getConnection(jdbcURL, user, passwd);
 
             // Create a statement object that will be sending your
             // SQL statements to the DBMS
 
-            this.stmt = conn.createStatement();
+            this.stmt = this.conn.createStatement();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException throwables) {
@@ -37,9 +38,10 @@ public class Main {
     public void loginEmployee(int u){
         Scanner input = new Scanner(System.in);
         System.out.println("Enter your univid");
-        //int uni = input.nextInt();
-        //this.login(uni);
-        this.employeeFunction();
+        int uni = input.nextInt();
+        if (this.login(uni)) {
+            this.employeeFunction();
+        }
     }
 
     private void employeeFunction() {
@@ -65,22 +67,43 @@ public class Main {
     public void loginUPS(int u){
         Scanner input = new Scanner(System.in);
         System.out.println("Enter your univid");
-        //int uni = input.nextInt();
-        //this.login(uni);
-        this.upsFunctions();
+        int uni = input.nextInt();
+        if (this.login(uni)){
+            this.upsFunctions();
+        }
 
     }
 
     public void loginStudent(int u){
         Scanner input = new Scanner(System.in);
         System.out.println("Enter your univid");
-        //int uni = input.nextInt();
-        //this.login(uni);
-        this.studentFunction();
+        int uni = input.nextInt();
+        if (this.login(uni)) {
+            this.studentFunction();
+        }
     }
 
-    private void login(int uni) {
-        // login logic
+    private boolean login(int uni) {
+        // login logicNon_Visitor
+        try{
+            String s = "select permit_id from Non_Visitor where unvid = " + uni;
+            ResultSet rs = this.stmt.executeQuery(s);
+            if(rs.next() == false){
+                System.out.println("User doesn't exists");
+                return false;
+            }
+            else {
+                while(rs.next()){
+                    permitId = rs.getString("permit_id");
+                    System.out.println(permitId);
+                    break;
+                }
+            }
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     private void studentFunction() {
@@ -105,11 +128,23 @@ public class Main {
 
     private void changeStudentVehicleList() {
 //        String permitNumber, int univId, boolean addOrRemove, String make, String model, String year, String color, String vehicleNumber
-        System.out.println("changeStudentVehicleList");
+        try {
+            System.out.println("changeStudentVehicleList");
+            String carmanufacturer = in.nextLine();
+            String model = in.nextLine();
+            int year = in.nextInt();
+            String color = in.nextLine();
+            String vehiclenumber = in.nextLine();
+            String query = "Update Permit P SET P.car_manufacturer = '" + carmanufacturer + "', P.model = '" + model + "', P.year = '" + year + "', P.color = '" + color + "', P.vehicle_number = '" + vehiclenumber + "' WHERE P.permit_id = '" + permitId + "'";
+            this.stmt.executeUpdate(query);
+            System.out.println("Updated the Student's Vehicle List");
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
     }
 
 
-    public void upsFunctions() throws SQLException {
+    public void upsFunctions(){
         //issueCitation()
         //addLot()
         //assignZoneToLot
@@ -165,49 +200,53 @@ public class Main {
         }
     }
 
-    private void changeEmpVehicleList() throws SQLException {
+    private void changeEmpVehicleList() {
 //        String permitNumber, int univId, boolean addOrRemove, String make, String model, int year, String color, String vehicleNumber
-        System.out.println("Do you want to add or remove a vehicle(a/r)?: ");
-        String option = in.nextLine();
-        if (option.equals("a")) {
-            ResultSet rs = this.stmt.executeQuery("SELECT * FROM Non_Visitor WHERE permit_id IS LIKE `"+ permitId+"`");
-            int size = 0;
-            if (rs != null) {
-                rs.last();
-                size = rs.getRow();
-            }
-            if (size < 5) {
-                System.out.println("Enter the make of your car: ");
-                String car_manufacturer = in.nextLine();
-                System.out.println("Enter the model of your car: ");
-                String model = in.nextLine();
-                System.out.println("Enter the year of your car: ");
-                int year = in.nextInt();
-                System.out.println("Enter the color of your car: ");
-                String color = in.nextLine();
-                System.out.println("Enter the vehicle number of your car: ");
-                String vehicleNumber = in.nextLine();
-                rs = this.stmt.executeQuery("SELECT * FROM Permit WHERE permit_id IS LIKE `"+ permitId+"`");
-                if (rs.next()) {
-                    String zone = rs.getString("zone");
-                    String start_date = rs.getString("start_date");
-                    String space_type = rs.getString("space_type");
-                    String expiry_date = rs.getString("expiry_date");
-                    String expiry_time = rs.getString("expiry_time");
-                    this.stmt.executeUpdate("INSERT INTO Permit VALUES("+permitId+","+zone+","
-                            +start_date+","+space_type+","+expiry_date+","+expiry_time+","
-                            +car_manufacturer+","+model+","+year+","+color+","+vehicleNumber+")");
-                }
-            } else {
-                System.out.println("The user already has 5 cars. Please remove one before adding any more.");
-            }
-        } else if (option.equals("r")) {
-            ResultSet rs = this.stmt.executeQuery("SELECT * FROM Non_Visitor WHERE permit_id IS LIKE `"+ permitId+"`");
-            System.out.println("Enter the vehicle number that you want to remove: ");
-            String vehicleNumber = in.nextLine();
-            this.stmt.executeUpdate("DELETE FROM Permit WHERE vehicle_number IS LIKE `"+vehicleNumber+"`");
-        }
-        System.out.println("changeRmpVehicleList");
+       try {
+           System.out.println("Do you want to add or remove a vehicle(a/r)?: ");
+           String option = in.nextLine();
+           if (option.equals("a")) {
+               ResultSet rs = this.stmt.executeQuery("SELECT * FROM Non_Visitor WHERE permit_id IS LIKE `" + permitId + "`");
+               int size = 0;
+               if (rs != null) {
+                   rs.last();
+                   size = rs.getRow();
+               }
+               if (size < 5) {
+                   System.out.println("Enter the make of your car: ");
+                   String car_manufacturer = in.nextLine();
+                   System.out.println("Enter the model of your car: ");
+                   String model = in.nextLine();
+                   System.out.println("Enter the year of your car: ");
+                   int year = in.nextInt();
+                   System.out.println("Enter the color of your car: ");
+                   String color = in.nextLine();
+                   System.out.println("Enter the vehicle number of your car: ");
+                   String vehicleNumber = in.nextLine();
+                   rs = this.stmt.executeQuery("SELECT * FROM Permit WHERE permit_id IS LIKE `" + permitId + "`");
+                   if (rs.next()) {
+                       String zone = rs.getString("zone");
+                       String start_date = rs.getString("start_date");
+                       String space_type = rs.getString("space_type");
+                       String expiry_date = rs.getString("expiry_date");
+                       String expiry_time = rs.getString("expiry_time");
+                       this.stmt.executeUpdate("INSERT INTO Permit VALUES(" + permitId + "," + zone + ","
+                               + start_date + "," + space_type + "," + expiry_date + "," + expiry_time + ","
+                               + car_manufacturer + "," + model + "," + year + "," + color + "," + vehicleNumber + ")");
+                   }
+               } else {
+                   System.out.println("The user already has 5 cars. Please remove one before adding any more.");
+               }
+           } else if (option.equals("r")) {
+               ResultSet rs = this.stmt.executeQuery("SELECT * FROM Non_Visitor WHERE permit_id IS LIKE `" + permitId + "`");
+               System.out.println("Enter the vehicle number that you want to remove: ");
+               String vehicleNumber = in.nextLine();
+               this.stmt.executeUpdate("DELETE FROM Permit WHERE vehicle_number IS LIKE `" + vehicleNumber + "`");
+           }
+           System.out.println("changeRmpVehicleList");
+       } catch (SQLException throwables) {
+           throwables.printStackTrace();
+       }
     }
 
     private void checkNVValidParking() {
@@ -288,6 +327,16 @@ public class Main {
     public void setupSchema(){
 
         try{
+
+//            this.stmt.executeQuery("drop table Notification");
+//            this.stmt.executeQuery("drop table Citation");
+//            this.stmt.executeQuery("drop table Spaces");
+//            this.stmt.executeQuery("drop table Parking_Lots");
+//            this.stmt.executeQuery("drop table Non_visitor");
+//            this.stmt.executeQuery("drop table Visitor");
+//            this.stmt.executeQuery("drop table Permit");
+//            String citation_table = "CREATE TABLE Citation (citation_time TIMESTAMP(0), citation_date DATE, car_license_number VARCHAR(50), citation_no NUMBER(10,0) NOT NULL, violation_category VARCHAR(5), fees NUMBER(10, 0), PRIMARY KEY (citation_no))";
+            String citation_seq = "CREATE SEQUENCE Citation_seq START WITH 1 INCREMENT BY 1";
             String citation_table = "CREATE TABLE Citation (citation_time TIMESTAMP(0), citation_date DATE, car_license_nunber VARCHAR(50), citation_no NUMBER(10, 0) NOT NULL, violation_category VARCHAR(5), fees NUMBER(10, 0), PRIMARY KEY (citation_no))";
             String notification_table = "CREATE TABLE Notification (citation_no number(10,0) NOT NULL, NotificationNumber NUMBER(10, 0) NOT NULL, PhoneNumber NUMBER(10, 0) NOT NULL, PRIMARY KEY (NotificationNumber), FOREIGN KEY(citation_no) REFERENCES Citation (citation_no) ON DELETE CASCADE)";
             //String vehicle_table = "CREATE TABLE Vehicle (car_manufacturer VARCHAR(20), model VARCHAR(10), year NUMBER(10, 0), color CHAR(20), vehicle_number NUMBER(10, 0), PRIMARY KEY (vehicle_number) ON DELETE CASCADE)";
@@ -310,14 +359,14 @@ public class Main {
 //            String owns2_relation = "CREATE TABLE Owns2(unvid INT, permit_id INT, vehicle_number INT, PRIMARY KEY (unvid, permit_id, vehicle_number), FOREIGN KEY (unvid, permit_id) REFERENCES Student(unvid, permit_id), FOREIGN KEY (vehicle_number) REFERENCES Vehicle(vehicle_number))";
             //String assigned_relation = "CREATE TABLE Assigned(permit_id INT,space_number VARCHAR(20), name VARCHAR(20), PRIMARY KEY(permit_id, space_number), FOREIGN KEY (space_number, permit_id) REFERENCES Visitor(space_number, permit_id), FOREIGN KEY (name) REFERENCES Parking_lots(name))";
             //String made_of_relation = "CREATE TABLE made_of(space_number INT NOT NULL, zone VARCHAR(10), designated_type VARCHAR(5), name VARCHAR(20) PRIMARY KEY (name, space_number), FOREIGN KEY (name) REFERENCES Parking_Lots )";
-            this.stmt.executeUpdate(citation_table);
-            this.stmt.executeUpdate(notification_table);
+//            this.stmt.executeUpdate(citation_table);
+//            this.stmt.executeUpdate(notification_table);
 //            this.stmt.executeUpdate(vehicle_table);
-            this.stmt.executeUpdate(parking_lot_table);
-            this.stmt.executeUpdate(spaces_tables);
-            this.stmt.executeUpdate(permit_table);
-            this.stmt.executeUpdate(non_visitor_table);
-            this.stmt.executeUpdate(visitor_table);
+//            this.stmt.executeUpdate(parking_lot_table);
+//            this.stmt.executeUpdate(spaces_tables);
+//            this.stmt.executeUpdate(permit_table);
+//            this.stmt.executeUpdate(non_visitor_table);
+//            this.stmt.executeUpdate(visitor_table);
             //this.stmt.executeUpdate(employee_table);
             //this.stmt.executeUpdate(student_table);
             //this.stmt.executeUpdate(notify_relation);
@@ -327,7 +376,7 @@ public class Main {
             //this.stmt.executeUpdate(owns2_relation);
 //            this.stmt.executeUpdate(assigned_relation);
             //STEP 5: Extract data from result set
-
+            this.stmt.execute(citation_seq);
 
         }catch(SQLException se){
             //Handle errors for JDBC
@@ -344,18 +393,18 @@ public class Main {
             }// nothing we can do
 
         }//end try
-        System.out.println("Goodbye!");
-        System.out.println("all the tables are ready");
+        //System.out.println("Goodbye!");
+        System.out.println("All the tables are ready");
     }
 
     public static void main(String[] args) throws SQLException {
 	// write your code here
         Scanner input = new Scanner(System.in);
         Main o = new Main();
-        //o.setupSchema();
+        o.setupSchema();
         while(true) {
             System.out.println("Who are you?");
-            System.out.println("1. UPS");
+            System.out.println("1. UPS Employee");
             System.out.println("2. Student");
             System.out.println("3. Employee");
             System.out.println("4. Visitor");
