@@ -390,6 +390,13 @@ public class Main {
 
     private void payCitation() {
 //        String citationNumber
+        try{
+            System.out.println("Insert citation number");
+            String ci = in.nextLine();
+            this.stmt.executeUpdate("UPDATE Citation SET status = 1 where citation_no =" + ci);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         System.out.println("paycitation");
     }
 
