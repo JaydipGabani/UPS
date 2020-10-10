@@ -1,9 +1,10 @@
 package com.company;
-import com.sun.nio.sctp.AbstractNotificationHandler;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.time.LocalDate;
+
 import java.util.*;
 import java.sql.*;
 
@@ -299,8 +300,43 @@ public class Main {
                 String violation_category = "No permit";
                 String name= in.nextLine();
                 String address= in.nextLine();
-                String c = "insert into Citation Values()";
-                String n = "insert into Notification Values()";
+                Timestamp citation_time= new Timestamp(System.currentTimeMillis());
+                String t = citation_time.toString().split("\\.")[0];
+                LocalDate citation_date= java.time.LocalDate.now();
+                String zone= in.nextLine();
+                LocalDate due=citation_date.plusDays(30);
+                System.out.println("is this visitor? yes/no");
+                String v = in.nextLine();
+                String phone = "", univ = "";
+//                if (v.equals("yes")){
+//                    rs = this.stmt.executeQuery("select Phone_number from Visitor where vehicle_number = '" + li +"'");
+//                    if(rs.next()){
+//                        phone = rs.getString("Phone_number");
+//                        System.out.println("Phone" + phone);
+//                    }
+//                }
+//                else{
+//                    rs = this.stmt.executeQuery("select univ from Non_Visitor where vehicle_number = '" + li +"'");
+//                    if(rs.next()){
+//                        univ = rs.getString("univ");
+//                        System.out.println("Univ" + univ);
+//                    }
+//                }
+                String c = String.format("insert into Citation (citation_time, citation_date, car_license_nunber, violation_category, fees, Due, zone_designation, address, name, model, color) Values(TO_TIMESTAMP('%s','YYYY-MM-DD HH24:MI:SS'),To_Date('%s', 'YYYY-MM-DD'),'%s','%s','%s',TO_DATE('%s','YYYY-MM-DD'),'%s','%s','%s','%s','%s')", t, citation_date, li, violation_category, fees, due, zone, address, name, model, color);
+                System.out.println(c);
+                this.stmt.execute(c);
+                rs = this.stmt.executeQuery("select * from Citation where citation_no = (select max(citation_no) from citation)");
+                String ci_no="";
+                if(rs.next()){
+                     ci_no = rs.getString("citation_no");
+                }
+                String n = String.format("insert into Notification (citation_no, PhoneNumber, univ) values ('%s','%s','%s')", ci_no, phone, univ);
+                this.stmt.execute(n);
+//                rs = this.stmt.executeQuery("select * from Notification where NotificationNumber = (select max(NotificationNumber) from Notification)");
+//                if(rs.next()){
+//
+//                    System.out.println(rs.getString("NotificationNumber"));
+//                }
             }
             else{
                 System.out.println("Enter lot info to see if it is properly parked");
@@ -309,15 +345,16 @@ public class Main {
                 String zone= in.nextLine();
                 if(name.equals(rs.getString("name")) && address.equals(rs.getString("address")) && zone.equals(rs.getString("zone_designation"))){
                     // check time
+
                 }
                 else{
                     //issue invalid permit citation
                 }
             }
-//            String due=;
-//            String citation_time=;
+
             String c = "insert into Citation Values()";
             String n = "insert into Notification Values()";
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -369,17 +406,17 @@ public class Main {
 
 //            this.stmt.executeQuery("drop table Notification");
 //            this.stmt.executeQuery("drop table Citation");
-//            this.stmt.executeQuery("drop table Spaces");
-//            this.stmt.executeQuery("drop table Parking_Lots");
 //            this.stmt.executeQuery("drop table Non_visitor");
 //            this.stmt.executeQuery("drop table Visitor");
 //            this.stmt.executeQuery("drop table Permit");
+//            this.stmt.executeQuery("drop table Spaces");
+//            this.stmt.executeQuery("drop table Parking_Lots");
 //            this.stmt.executeQuery("drop sequence Citaion_seq");
 //            this.stmt.executeQuery("drop sequence Notification_seq");
 //            String citation_table = "CREATE TABLE Citation (citation_time TIMESTAMP(0), citation_date DATE, car_license_number VARCHAR(50), citation_no NUMBER(10,0) NOT NULL, violation_category VARCHAR(5), fees NUMBER(10, 0), PRIMARY KEY (citation_no))";
             String citation_seq = "CREATE SEQUENCE Citation_seq START WITH 1 INCREMENT BY 1";
 
-            String citation_table = "CREATE TABLE Citation (citation_time TIMESTAMP(0), citation_date DATE, car_license_nunber VARCHAR(50), citation_no NUMBER(10, 0) NOT NULL, violation_category VARCHAR(5), fees NUMBER(10, 0), Due DATE, status NUMBER(1,0) DEFAULT 0, zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (citation_no), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
+            String citation_table = "CREATE TABLE Citation (model varchar(10), color char(20), citation_time TIMESTAMP(0), citation_date DATE, car_license_nunber VARCHAR(50), citation_no NUMBER(10, 0) NOT NULL, violation_category VARCHAR(10), fees NUMBER(10, 0), Due DATE, status NUMBER(1,0) DEFAULT 0, zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (citation_no), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
 
             String notification_table = "CREATE TABLE Notification (citation_no number(10,0) NOT NULL, NotificationNumber NUMBER(10, 0) NOT NULL, PhoneNumber NUMBER(10, 0), univ NUMBER(10,0), PRIMARY KEY (NotificationNumber), FOREIGN KEY(citation_no) REFERENCES Citation (citation_no) ON DELETE CASCADE)";
             String noti_seq = "CREATE SEQUENCE Notification_seq START WITH 1 INCREMENT BY 1";
