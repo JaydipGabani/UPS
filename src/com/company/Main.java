@@ -265,11 +265,46 @@ public class Main {
 
     private void assignPermit() {
 //        int univId, String zone, String type, String vehicleNumber
+        try {
+            String univ = in.nextLine();
+            String type = in.nextLine();
+            String zone = in.nextLine();
+            String li = in.nextLine();
+            String permit = in.nextLine();
+            String color = in.nextLine();
+            String model = in.nextLine();
+            String year = in.nextLine();
+            String manu = in.nextLine();
+            String name = "a", address = "a", zone_desi = "a";
+            LocalDate start_date = java.time.LocalDate.now();
+            LocalDate end_date = null;
+            System.out.println("is this a student permit? yes/no");
+            String st = in.nextLine();
+            if (!st.equals("yes")) {
+                end_date = start_date.plusYears(1);
+            } else {
+                end_date = start_date.plusMonths(4);
+            }
+            String per = String.format("insert into Permit (permit_id, zone, start_date, space_type, expiry_date, expiry_time, car_manufacturer, model, year, color, vehicle_number, zone_designation, address, name) values('%s','%s',TO_DATE('%s','YYYY-MM-DD'),'%s',TO_DATE('%s','YYYY-MM-DD'),TO_TIMESTAMP('%s 23:59:00', 'YYYY-MM-DD HH24:MI:SS'),'%s','%s','%s','%s','%s','%s','%s','%s')",permit, zone, start_date, type, end_date, end_date, manu, model, year, color, li, zone_desi, address, name);
+            String non = String.format("insert into Non_Visitor (unvid, permit_id, vehicle_number) values('%s','%s','%s')", univ, permit, li);
+            this.stmt.executeUpdate(per);
+            this.stmt.executeUpdate(non);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         System.out.println("assignPermit");
     }
 
     private void assignTypeToSpace() {
 //        String lotName, int spaceNumber, String type
+        try {
+            String name = in.nextLine(), space = in.nextLine(), type = in.nextLine(), address = in.nextLine(), zone_desi = in.nextLine();
+            this.stmt.executeUpdate(String.format("UPDATE Spaces set designated_type ='%s' where name = '%s' and address = '%s' and space_number = '%s' and zone_designation = '%s'", type, name, address, space, zone_desi));
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
         System.out.println("assignTypeToSpace");
     }
 
@@ -390,6 +425,13 @@ public class Main {
 
     private void payCitation() {
 //        String citationNumber
+        try{
+            System.out.println("Insert citation number");
+            String ci = in.nextLine();
+            this.stmt.executeUpdate("UPDATE Citation SET status = 1 where citation_no =" + ci);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         System.out.println("paycitation");
     }
 
@@ -421,11 +463,11 @@ public class Main {
             String notification_table = "CREATE TABLE Notification (citation_no number(10,0) NOT NULL, NotificationNumber NUMBER(10, 0) NOT NULL, PhoneNumber NUMBER(10, 0), univ NUMBER(10,0), PRIMARY KEY (NotificationNumber), FOREIGN KEY(citation_no) REFERENCES Citation (citation_no) ON DELETE CASCADE)";
             String noti_seq = "CREATE SEQUENCE Notification_seq START WITH 1 INCREMENT BY 1";
             //String vehicle_table = "CREATE TABLE Vehicle (car_manufacturer VARCHAR(20), model VARCHAR(10), year NUMBER(10, 0), color CHAR(20), vehicle_number NUMBER(10, 0), PRIMARY KEY (vehicle_number) ON DELETE CASCADE)";
-            String parking_lot_table = "CREATE TABLE Parking_Lots (zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (name, zone_designation, address))";
+            String parking_lot_table = "CREATE TABLE Parking_Lots (zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20) UNIQUE, PRIMARY KEY (name, zone_designation, address))";
 
-            String spaces_tables = "CREATE TABLE Spaces(space_number NUMBER(10, 0) NOT NULL, zone VARCHAR(10), designated_type VARCHAR(5), zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (name, zone_designation, address, space_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
+            String spaces_tables = "CREATE TABLE Spaces(space_number NUMBER(10, 0) NOT NULL, zone VARCHAR(10), designated_type VARCHAR(10) DEFAULT  'regular' NOT NULL, zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (name, zone_designation, address, space_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
 
-            String permit_table = "CREATE TABLE Permit (permit_id VARCHAR(8), zone VARCHAR(10), start_date DATE, space_type VARCHAR(10), expiry_date DATE, expiry_time TIMESTAMP(0), car_manufacturer VARCHAR(20), model VARCHAR(10), year NUMBER(10, 0), color CHAR(20), vehicle_number varchar(10), zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (permit_id, vehicle_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
+            String permit_table = "CREATE TABLE Permit (permit_id VARCHAR(8), zone VARCHAR(10), start_date DATE, space_type VARCHAR(10), expiry_date DATE, expiry_time TIMESTAMP(0), car_manufacturer VARCHAR(20), model VARCHAR(10), year NUMBER(10, 0), color CHAR(20), vehicle_number varchar(10), zone_designation VARCHAR(10) default 'regular', address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (permit_id, vehicle_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
 
             String non_visitor_table = "CREATE TABLE Non_Visitor(unvid NUMBER(10, 0), permit_id varchar(8), vehicle_number varchar(10), PRIMARY KEY(permit_id, vehicle_number), FOREIGN KEY (permit_id, vehicle_number) REFERENCES Permit(permit_id, vehicle_number) ON DELETE CASCADE)";
 
