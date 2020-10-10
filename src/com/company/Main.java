@@ -1,4 +1,8 @@
 package com.company;
+import com.sun.nio.sctp.AbstractNotificationHandler;
+import java.text.SimpleDateFormat;
+import java.sql.Timestamp;
+import java.util.Date;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -256,11 +260,52 @@ public class Main {
     private void checkNVValidParking() {
 //        String currentTime, java.sql.Date date, String lotName, String type, String licensePlate
         System.out.println("checkNVValidParking");
+        System.out.println("Enter Space Number: ");
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+//        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+//        Date date = new Date();
+        int space_number = in.nextInt();
+        System.out.println("Enter Lot Number: ");
+        String lot = in.nextLine();
+        System.out.println("Enter License Number: ");
+        String license = in.nextLine();
+        String query = "SELECT * FROM Non_Visitor V, permit_table P WHERE P.expiry_time > '" +timestamp+ "', V.vehicle_number = '" +license+ "', V.lot = '" +lot+ "', V.space_number = '" +space_number+ "'";
+        boolean isResultSet = false;
+        try {
+            isResultSet = this.stmt.execute(query);
+            if (isResultSet) {
+                System.out.println("Requested Car has a valid permit");
+            } else {
+                System.out.println("Requested Car does not have a valid permit");
+            }
+        }catch(SQLException se){
+            se.printStackTrace();
+        }
     }
-
+//            String visitor_table = "CREATE TABLE Visitor(permit_id varchar(8), vehicle_number varchar (10), Phone_number number(10,0), lot VARCHAR(5), space_number VARCHAR(20), PRIMARY KEY (vehicle_number, permit_id), FOREIGN KEY (permit_id, vehicle_number) REFERENCES Permit(permit_id, vehicle_number)ON DELETE CASCADE)";
     private void checkVValidParking() {
 //        String currentTime, java.sql.Date date, String lotName, int spaceNumber, String type, String licensePlate
-        System.out.println("checkVValidParking");
+        System.out.println("Enter Space Number: ");
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+//        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+//        Date date = new Date();
+        int space_number = in.nextInt();
+        System.out.println("Enter Lot Number: ");
+         String lot = in.nextLine();
+        System.out.println("Enter License Number: ");
+         String license = in.nextLine();
+         String query = "SELECT * FROM Visitor V, permit_table P WHERE P.expiry_time > '" +timestamp+ "', V.vehicle_number = '" +license+ "', V.lot = '" +lot+ "', V.space_number = '" +space_number+ "'";
+        boolean isResultSet = false;
+        try {
+            isResultSet = this.stmt.execute(query);
+            if (isResultSet) {
+                System.out.println("Requested Car has a valid permit");
+            } else {
+                System.out.println("Requested Car does not have a valid permit");
+            }
+        }catch(SQLException se){
+            se.printStackTrace();
+        }
     }
 
     private void assignPermit() {
@@ -417,10 +462,31 @@ public class Main {
             }
         }
     }
-
+//permit_id VARCHAR(8), zone VARCHAR(10), start_date DATE, space_type VARCHAR(10), expiry_date DATE, expiry_time TIMESTAMP(0), car_manufacturer VARCHAR(20), model VARCHAR(10), year NUMBER(10, 0), color CHAR(20), vehicle_number varchar(10), zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (permit_id, vehicle_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
     private void getVisitorPermit() {
 //        String licensePlate, String type, String lotName, String duration
-        System.out.println("getVisitorPermit");
+
+        System.out.println("Permit Information:");
+        String query = "select * from Permit P where P.permit_id = `" + permitId + "`";
+        ResultSet rs = stmt.executeQuery(query);
+        while(rs.next()){
+            //Retrieve by column name
+
+            String permitid = rs.getString("permit_id");
+            String zone = rs.getString("zone");
+            String start_date = rs.getString("start_date");
+            String space_type = rs.getString("space_type");
+            String expiry_date = rs.getString("expiry_date");
+            String expiry_time = rs.getString("expiry_time");
+            //Display values
+            System.out.print("Permit id: " + permitid);
+            System.out.print(", Zone: " + zone);
+            System.out.print(", Start Date: " + start_date);
+            System.out.println(", Space Type: " + space_type);
+            System.out.println(", Expiry Date: " + expiry_date);
+            System.out.println(", Expiry Time: " + expiry_time);
+        }
+
     }
 
     private void payCitation() {
@@ -467,7 +533,7 @@ public class Main {
 
             String spaces_tables = "CREATE TABLE Spaces(space_number NUMBER(10, 0) NOT NULL, zone VARCHAR(10), designated_type VARCHAR(10) DEFAULT  'regular' NOT NULL, zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (name, zone_designation, address, space_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
 
-            String permit_table = "CREATE TABLE Permit (permit_id VARCHAR(8), zone VARCHAR(10), start_date DATE, space_type VARCHAR(10), expiry_date DATE, expiry_time TIMESTAMP(0), car_manufacturer VARCHAR(20), model VARCHAR(10), year NUMBER(10, 0), color CHAR(20), vehicle_number varchar(10), zone_designation VARCHAR(10) default 'regular', address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (permit_id, vehicle_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
+            String permit_table = "CREATE TABLE Permit (permit_id VARCHAR(8), zone VARCHAR(10), start_date DATE, space_type VARCHAR(10), expiry_date DATE, expiry_time TIMESTAMP(2), car_manufacturer VARCHAR(20), model VARCHAR(10), year NUMBER(10, 0), color CHAR(20), vehicle_number varchar(10), zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (permit_id, vehicle_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
 
             String non_visitor_table = "CREATE TABLE Non_Visitor(unvid NUMBER(10, 0), permit_id varchar(8), vehicle_number varchar(10), PRIMARY KEY(permit_id, vehicle_number), FOREIGN KEY (permit_id, vehicle_number) REFERENCES Permit(permit_id, vehicle_number) ON DELETE CASCADE)";
 
