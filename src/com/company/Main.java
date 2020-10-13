@@ -11,6 +11,7 @@ import java.time.LocalDate;
 
 import java.util.*;
 import java.sql.*;
+import java.util.stream.StreamSupport;
 
 public class Main {
     public Statement stmt = null;
@@ -368,8 +369,7 @@ public class Main {
         System.out.println("issueCitation");
         try{
             String li = in.nextLine();
-
-
+            // issue of having multiple permits belonging to same vehicle for visitor
             ResultSet rs = this.stmt.executeQuery("SELECT * from Permit where vehicle_number = '"+li+"'");
             if(!rs.next()){
                 System.out.println("dont exists");
@@ -385,23 +385,7 @@ public class Main {
                 LocalDate citation_date= java.time.LocalDate.now();
                 String zone= in.nextLine();
                 LocalDate due=citation_date.plusDays(30);
-                System.out.println("is this visitor? yes/no");
-                String v = in.nextLine();
                 String phone = "", univ = "";
-//                if (v.equals("yes")){
-//                    rs = this.stmt.executeQuery("select Phone_number from Visitor where vehicle_number = '" + li +"'");
-//                    if(rs.next()){
-//                        phone = rs.getString("Phone_number");
-//                        System.out.println("Phone" + phone);
-//                    }
-//                }
-//                else{
-//                    rs = this.stmt.executeQuery("select univ from Non_Visitor where vehicle_number = '" + li +"'");
-//                    if(rs.next()){
-//                        univ = rs.getString("univ");
-//                        System.out.println("Univ" + univ);
-//                    }
-//                }
                 String c = String.format("insert into Citation (citation_time, citation_date, car_license_nunber, violation_category, fees, Due, zone_designation, address, name, model, color) Values(TO_TIMESTAMP('%s','YYYY-MM-DD HH24:MI:SS'),To_Date('%s', 'YYYY-MM-DD'),'%s','%s','%s',TO_DATE('%s','YYYY-MM-DD'),'%s','%s','%s','%s','%s')", t, citation_date, li, violation_category, fees, due, zone, address, name, model, color);
                 System.out.println(c);
                 this.stmt.execute(c);
@@ -419,21 +403,68 @@ public class Main {
 //                }
             }
             else{
-                System.out.println("Enter lot info to see if it is properly parked");
-                String name= in.nextLine();
-                String address= in.nextLine();
-                String zone= in.nextLine();
-                if(name.equals(rs.getString("name")) && address.equals(rs.getString("address")) && zone.equals(rs.getString("zone_designation"))){
-                    // check time
+                Date et = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(rs.getString("expiry_time"));
+                //Date d = new SimpleDateFormat("YYYY-MM-DD HH24:MI:SS").format(new Date());
+                Date d = new Date();
+                if(!et.after(d)){
+                    System.out.println(et.toString());
+                    System.out.println("Enter lot info to see if it is properly parked");
+                    String name= in.nextLine();
+                    String address= in.nextLine();
+                    String zone= in.nextLine();
+                    //check for the valid parking
+//                    if(name.equals(rs.getString("name")) && address.equals(rs.getString("address")) && zone.equals(rs.getString("zone_designation"))) {
+//                        // check time
+//                    }
+//                    else {
+//                        //issue invalid permit citation
+//                    }
+                }
+                else
+                {
+                    System.out.println("Permit expired");
+//                    String c = "insert into Citation Values()";
+//                    String n = "insert into Notification Values()";
+                    String t = new Timestamp(System.currentTimeMillis()).toString().split("\\.")[0];
+                    String c = "";
 
+                        c = String.format("insert into Citation (citation_time, citation_date, car_license_nunber, violation_category, fees, Due, zone_designation, address, name, model, color) Values(TO_TIMESTAMP('%s','YYYY-MM-DD HH24:MI:SS'),To_Date('%s', 'YYYY-MM-DD'),'%s','%s','%s',TO_DATE('%s','YYYY-MM-DD'),'%s','%s','%s','%s','%s')", t, LocalDate.now(), li, "Expired", "25", LocalDate.now().plusDays(30), rs.getString("zone_designation"), rs.getString("address"), rs.getString("name"), rs.getString("model"), rs.getString("color"));
+
+                    String phone = "", univ = "";
+                    System.out.println("is this visitor parking? yes/no");
+                    String x ="";
+                    if(in.nextLine().equals("yes")){
+                        System.out.println(rs.getString("permit_id") + ":" +rs.getString("vehicle_number"));
+                        x = String.format("Select * from Visitor where permit_id = '%s' and vehicle_number = '%s'", rs.getString("permit_id"), rs.getString("vehicle_number"));
+                        rs = this.stmt.executeQuery(x);
+                        if(rs.next()){
+                            phone = rs.getString("Phone_number");
+                        }
+                    }
+                    else{
+                        System.out.println(rs.getString("permit_id") + ":" + rs.getString("vehicle_number"));
+                        x = String.format("Select * from Non_Visitor where permit_id = '%s' and vehicle_number = '%s'", rs.getString("permit_id"), rs.getString("vehicle_number"));
+                        rs = this.stmt.executeQuery(x);
+                        if (rs.next()) {
+                            univ = rs.getString("unvid");
+                            System.out.println(univ);
+                        }
+                    }
+                    System.out.println(c);
+                    this.stmt.execute(c);
+                    ResultSet cs = this.stmt.executeQuery("select * from Citation where citation_no = (select max(citation_no) from citation)");
+                    String ci_no="";
+                    if(cs.next()){
+                        ci_no = cs.getString("citation_no");
+                    }
+                    String n = String.format("insert into Notification (citation_no, PhoneNumber, univ) values ('%s','%s','%s')", ci_no, phone, univ);
+                    System.out.println(n);
+                    this.stmt.execute(n);
+                    System.out.println("Citation issued" + ci_no);
                 }
-                else{
-                    //issue invalid permit citation
-                }
+
             }
 
-            String c = "insert into Citation Values()";
-            String n = "insert into Notification Values()";
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -465,26 +496,28 @@ public class Main {
 //permit_id VARCHAR(8), zone VARCHAR(10), start_date DATE, space_type VARCHAR(10), expiry_date DATE, expiry_time TIMESTAMP(0), car_manufacturer VARCHAR(20), model VARCHAR(10), year NUMBER(10, 0), color CHAR(20), vehicle_number varchar(10), zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (permit_id, vehicle_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
     private void getVisitorPermit() {
 //        String licensePlate, String type, String lotName, String duration
-
-        System.out.println("Permit Information:");
-        String query = "select * from Permit P where P.permit_id = `" + permitId + "`";
-        ResultSet rs = stmt.executeQuery(query);
-        while(rs.next()){
-            //Retrieve by column name
-
-            String permitid = rs.getString("permit_id");
-            String zone = rs.getString("zone");
-            String start_date = rs.getString("start_date");
-            String space_type = rs.getString("space_type");
-            String expiry_date = rs.getString("expiry_date");
-            String expiry_time = rs.getString("expiry_time");
-            //Display values
-            System.out.print("Permit id: " + permitid);
-            System.out.print(", Zone: " + zone);
-            System.out.print(", Start Date: " + start_date);
-            System.out.println(", Space Type: " + space_type);
-            System.out.println(", Expiry Date: " + expiry_date);
-            System.out.println(", Expiry Time: " + expiry_time);
+        try {
+            System.out.println("Permit Information:");
+            String query = "select * from Permit P where P.permit_id = `" + permitId + "`";
+            ResultSet rs = this.stmt.executeQuery(query);
+            while (rs.next()) {
+                //Retrieve by column name
+                String permitid = rs.getString("permit_id");
+                String zone = rs.getString("zone");
+                String start_date = rs.getString("start_date");
+                String space_type = rs.getString("space_type");
+                String expiry_date = rs.getString("expiry_date");
+                String expiry_time = rs.getString("expiry_time");
+                //Display values
+                System.out.print("Permit id: " + permitid);
+                System.out.print(", Zone: " + zone);
+                System.out.print(", Start Date: " + start_date);
+                System.out.println(", Space Type: " + space_type);
+                System.out.println(", Expiry Date: " + expiry_date);
+                System.out.println(", Expiry Time: " + expiry_time);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
         }
 
     }
@@ -551,7 +584,7 @@ public class Main {
             this.stmt.executeUpdate(parking_lot_table);
             this.stmt.executeUpdate(citation_table);
             this.stmt.executeUpdate(notification_table);
-//            this.stmt.executeUpdate(vehicle_table);
+//          this.stmt.executeUpdate(vehicle_table);
             this.stmt.executeUpdate(spaces_tables);
             this.stmt.executeUpdate(permit_table);
             this.stmt.executeUpdate(non_visitor_table);
