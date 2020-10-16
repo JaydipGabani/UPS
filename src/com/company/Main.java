@@ -286,10 +286,10 @@ public class Main {
 //        Date date = new Date();
         int space_number = in.nextInt();
         System.out.println("Enter Lot Number: ");
-         String lot = in.nextLine();
+        String lot = in.nextLine();
         System.out.println("Enter License Number: ");
-         String license = in.nextLine();
-         String query = "SELECT * FROM Visitor V, permit_table P WHERE P.expiry_time > '" +timestamp+ "', V.vehicle_number = '" +license+ "', V.lot = '" +lot+ "', V.space_number = '" +space_number+ "'";
+        String license = in.nextLine();
+        String query = "SELECT * FROM Visitor V, permit_table P WHERE P.expiry_time > '" +timestamp+ "', V.vehicle_number = '" +license+ "', V.lot = '" +lot+ "', V.space_number = '" +space_number+ "'";
         boolean isResultSet = false;
         try {
             isResultSet = this.stmt.execute(query);
@@ -306,27 +306,44 @@ public class Main {
     private void assignPermit() {
 //        int univId, String zone, String type, String vehicleNumber
         try {
+            System.out.println("Enter univid");
             String univ = in.nextLine();
+            System.out.println("type");
             String type = in.nextLine();
+            System.out.println("Enter Zone");
             String zone = in.nextLine();
+            System.out.println("Enter vehicle number");
             String li = in.nextLine();
+            System.out.println("Generated permit id is");
+            // call generate permit id
             String permit = in.nextLine();
+            System.out.println("Enter color of the vehicle");
             String color = in.nextLine();
+            System.out.println("Enter modla of the vehicle");
             String model = in.nextLine();
+            System.out.println("Enter year of the vehicle");
             String year = in.nextLine();
+            System.out.println("Enter manufacturer of the vehicle");
             String manu = in.nextLine();
-            String name = "a", address = "a", zone_desi = "a";
+            System.out.println("Enter name of the parking lot");
+            String name = in.nextLine();
+            System.out.println("Enter address of the parking lot");
+            String address = in.nextLine();
+            System.out.println("Enter zone designation of the parking lot");
+            String zone_desi = in.nextLine();
             LocalDate start_date = java.time.LocalDate.now();
             LocalDate end_date = null;
             System.out.println("is this a student permit? yes/no");
             String st = in.nextLine();
+            String se = "S";
             if (!st.equals("yes")) {
                 end_date = start_date.plusYears(1);
             } else {
                 end_date = start_date.plusMonths(4);
+                se = "E";
             }
             String per = String.format("insert into Permit (permit_id, zone, start_date, space_type, expiry_date, expiry_time, car_manufacturer, model, year, color, vehicle_number, zone_designation, address, name) values('%s','%s',TO_DATE('%s','YYYY-MM-DD'),'%s',TO_DATE('%s','YYYY-MM-DD'),TO_TIMESTAMP('%s 23:59:00', 'YYYY-MM-DD HH24:MI:SS'),'%s','%s','%s','%s','%s','%s','%s','%s')",permit, zone, start_date, type, end_date, end_date, manu, model, year, color, li, zone_desi, address, name);
-            String non = String.format("insert into Non_Visitor (unvid, permit_id, vehicle_number) values('%s','%s','%s')", univ, permit, li);
+            String non = String.format("insert into Non_Visitor (unvid, permit_id, vehicle_number, S_E) values('%s','%s','%s', '%s')", univ, permit, li, se);
             this.stmt.executeUpdate(per);
             this.stmt.executeUpdate(non);
         } catch (Exception e) {
@@ -339,6 +356,7 @@ public class Main {
     private void assignTypeToSpace() {
 //        String lotName, int spaceNumber, String type
         try {
+            System.out.println("Enter Name of the parking lot, space number, type, address and zone designation");
             String name = in.nextLine(), space = in.nextLine(), type = in.nextLine(), address = in.nextLine(), zone_desi = in.nextLine();
             this.stmt.executeUpdate(String.format("UPDATE Spaces set designated_type ='%s' where name = '%s' and address = '%s' and space_number = '%s' and zone_designation = '%s'", type, name, address, space, zone_desi));
         } catch (SQLException throwables) {
