@@ -45,8 +45,8 @@ public class Main {
     }
     public void loginEmployee(int u){
         System.out.println("Enter your univid");
-        int uni = in.nextInt();
-        if (this.login(uni)) {
+        String uni = in.nextLine();
+        if (this.login(uni, "E")) {
             this.employeeFunction();
         }
     }
@@ -57,6 +57,7 @@ public class Main {
             System.out.println("2. PayCitation");
             System.out.println("Any other number to go back");
             int u = in.nextInt();
+            in.nextLine();
             switch (u){
                 case 1:
                     this.changeEmpVehicleList();
@@ -71,10 +72,10 @@ public class Main {
     }
 
     public void loginUPS(int u){
-        this.upsFunctions();
         System.out.println("Enter your univid");
-        int uni = in.nextInt();
-        if (this.login(uni)){
+        String uni = in.nextLine();
+
+        if (this.login(uni, "E")){
             this.upsFunctions();
         }
 
@@ -82,29 +83,26 @@ public class Main {
 
     public void loginStudent(int u){
         System.out.println("Enter your univid");
-        int uni = in.nextInt();
-        if (this.login(uni)) {
+        String uni = in.nextLine();
+        if (this.login(uni, "S")) {
             this.studentFunction();
         }
     }
 
-    private boolean login(int uni) {
+    private boolean login(String uni, String se) {
         // login logicNon_Visitor
         try{
-            String s = "select permit_id from Non_Visitor where unvid = " + uni;
+            String s = String.format("select permit_id from Non_Visitor where unvid = '%s' and S_E = '%s'", uni, se);
             ResultSet rs = this.stmt.executeQuery(s);
-            if(rs.next() == false){
+            if(!rs.next()){
                 System.out.println("User doesn't exists");
                 return false;
             }
             else {
-                while(rs.next()){
                     permitId = rs.getString("permit_id");
                     System.out.println(permitId);
-                    break;
-                }
+                    return true;
             }
-            return true;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -117,6 +115,7 @@ public class Main {
             System.out.println("2. PayCitation");
             System.out.println("Any other number to go back");
             int u = in.nextInt();
+            in.nextLine();
             switch (u){
                 case 1:
                     this.changeStudentVehicleList();
@@ -168,6 +167,7 @@ public class Main {
             System.out.println("9. PayCitation");
             System.out.println("Any other number to go back");
             int u = in.nextInt();
+            in.nextLine();
             switch (u){
                 case 1:
                     this.issueCitation();
@@ -308,10 +308,18 @@ public class Main {
         try {
             System.out.println("Enter univid");
             String univ = in.nextLine();
-            System.out.println("type");
-            String type = in.nextLine();
+            System.out.println("Enter name of the parking lot");
+            String name = in.nextLine();
+            System.out.println("Enter address of the parking lot");
+            String address = in.nextLine();
+            System.out.println("Enter zone designation of the parking lot");
+            String zone_desi = in.nextLine();
             System.out.println("Enter Zone");
             String zone = in.nextLine();
+
+            System.out.println("enter space type (regular, electric, handi)");
+            String type = in.nextLine();
+
             System.out.println("Enter vehicle number");
             String li = in.nextLine();
             System.out.println("Generated permit id is");
@@ -325,12 +333,7 @@ public class Main {
             String year = in.nextLine();
             System.out.println("Enter manufacturer of the vehicle");
             String manu = in.nextLine();
-            System.out.println("Enter name of the parking lot");
-            String name = in.nextLine();
-            System.out.println("Enter address of the parking lot");
-            String address = in.nextLine();
-            System.out.println("Enter zone designation of the parking lot");
-            String zone_desi = in.nextLine();
+
             LocalDate start_date = java.time.LocalDate.now();
             LocalDate end_date = null;
             System.out.println("is this a student permit? yes/no");
@@ -441,21 +444,26 @@ public class Main {
 //        String licensePlate, String violationCategory
         System.out.println("issueCitation");
         try{
+            System.out.println("Enter Car number");
             String li = in.nextLine();
             // issue of having multiple permits belonging to same vehicle for visitor
             ResultSet rs = this.stmt.executeQuery("SELECT * from Permit where vehicle_number = '"+li+"'");
             if(!rs.next()){
-                System.out.println("dont exists");
-                System.out.println("Enter Car model, color");
+                System.out.println("Permit dont exists");
+                System.out.println("Enter Car model");
                 String model = in.nextLine();
+                System.out.println("Enter color");
                 String color=in.nextLine();
                 String fees = "40";
                 String violation_category = "No permit";
+                System.out.println("Enter name of the parking lot");
                 String name= in.nextLine();
+                System.out.println("Enter address of the parking lot");
                 String address= in.nextLine();
                 Timestamp citation_time= new Timestamp(System.currentTimeMillis());
                 String t = citation_time.toString().split("\\.")[0];
                 LocalDate citation_date= java.time.LocalDate.now();
+                System.out.println("Enter zone designation of the parking lot");
                 String zone= in.nextLine();
                 LocalDate due=citation_date.plusDays(30);
                 String phone = "", univ = "";
@@ -469,22 +477,23 @@ public class Main {
                 }
                 String n = String.format("insert into Notification (citation_no, PhoneNumber, univ) values ('%s','%s','%s')", ci_no, phone, univ);
                 this.stmt.execute(n);
-//                rs = this.stmt.executeQuery("select * from Notification where NotificationNumber = (select max(NotificationNumber) from Notification)");
-//                if(rs.next()){
-//
-//                    System.out.println(rs.getString("NotificationNumber"));
-//                }
             }
             else{
                 Date et = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(rs.getString("expiry_time"));
                 //Date d = new SimpleDateFormat("YYYY-MM-DD HH24:MI:SS").format(new Date());
+                String fees = "";
                 Date d = new Date();
-                if(!et.after(d)){
-                    System.out.println(et.toString());
-                    System.out.println("Enter lot info to see if it is properly parked");
-                    String name= in.nextLine();
-                    String address= in.nextLine();
-                    String zone= in.nextLine();
+                System.out.println(d);
+                System.out.println(et);
+                if(et.after(d)){
+//                    System.out.println(et.toString());
+//                    System.out.println("Enter lot info to see if it is properly parked");
+//                    System.out.println("Enter name of the zone");
+//                    String name= in.nextLine();
+//                    System.out.println("Enter address");
+//                    String address= in.nextLine();
+//                    System.out.println("Enter zone");
+//                    String zone= in.nextLine();
                     //check for the valid parking
 //                    if(name.equals(rs.getString("name")) && address.equals(rs.getString("address")) && zone.equals(rs.getString("zone_designation"))) {
 //                        // check time
@@ -492,53 +501,53 @@ public class Main {
 //                    else {
 //                        //issue invalid permit citation
 //                    }
+                    System.out.println("Permit is Invalid");
+                    fees = "20";
+
                 }
                 else
                 {
                     System.out.println("Permit expired");
-//                    String c = "insert into Citation Values()";
-//                    String n = "insert into Notification Values()";
-                    String t = new Timestamp(System.currentTimeMillis()).toString().split("\\.")[0];
-                    String c = "";
+                    fees = "25";
 
-                        c = String.format("insert into Citation (citation_time, citation_date, car_license_nunber, violation_category, fees, Due, zone_designation, address, name, model, color) Values(TO_TIMESTAMP('%s','YYYY-MM-DD HH24:MI:SS'),To_Date('%s', 'YYYY-MM-DD'),'%s','%s','%s',TO_DATE('%s','YYYY-MM-DD'),'%s','%s','%s','%s','%s')", t, LocalDate.now(), li, "Expired", "25", LocalDate.now().plusDays(30), rs.getString("zone_designation"), rs.getString("address"), rs.getString("name"), rs.getString("model"), rs.getString("color"));
-
-                    String phone = "", univ = "";
-                    System.out.println("is this visitor parking? yes/no");
-                    String x ="";
-                    if(in.nextLine().equals("yes")){
-                        System.out.println(rs.getString("permit_id") + ":" +rs.getString("vehicle_number"));
-                        x = String.format("Select * from Visitor where permit_id = '%s' and vehicle_number = '%s'", rs.getString("permit_id"), rs.getString("vehicle_number"));
-                        rs = this.stmt.executeQuery(x);
-                        if(rs.next()){
-                            phone = rs.getString("Phone_number");
-                        }
-                    }
-                    else{
-                        System.out.println(rs.getString("permit_id") + ":" + rs.getString("vehicle_number"));
-                        x = String.format("Select * from Non_Visitor where permit_id = '%s' and vehicle_number = '%s'", rs.getString("permit_id"), rs.getString("vehicle_number"));
-                        rs = this.stmt.executeQuery(x);
-                        if (rs.next()) {
-                            univ = rs.getString("unvid");
-                            System.out.println(univ);
-                        }
-                    }
-                    System.out.println(c);
-                    this.stmt.execute(c);
-                    ResultSet cs = this.stmt.executeQuery("select * from Citation where citation_no = (select max(citation_no) from citation)");
-                    String ci_no="";
-                    if(cs.next()){
-                        ci_no = cs.getString("citation_no");
-                    }
-                    String n = String.format("insert into Notification (citation_no, PhoneNumber, univ) values ('%s','%s','%s')", ci_no, phone, univ);
-                    System.out.println(n);
-                    this.stmt.execute(n);
-                    System.out.println("Citation issued" + ci_no);
                 }
+                String t = new Timestamp(System.currentTimeMillis()).toString().split("\\.")[0];
+                String c = "";
 
+                c = String.format("insert into Citation (citation_time, citation_date, car_license_nunber, violation_category, fees, Due, zone_designation, address, name, model, color) Values(TO_TIMESTAMP('%s','YYYY-MM-DD HH24:MI:SS'),To_Date('%s', 'YYYY-MM-DD'),'%s','%s','%s',TO_DATE('%s','YYYY-MM-DD'),'%s','%s','%s','%s','%s')", t, LocalDate.now(), li, "Expired", fees, LocalDate.now().plusDays(30), rs.getString("zone_designation"), rs.getString("address"), rs.getString("name"), rs.getString("model"), rs.getString("color"));
+
+                String phone = "", univ = "";
+                System.out.println("is this visitor parking? yes/no");
+                String x ="";
+                if(in.nextLine().equals("yes")){
+                    System.out.println(rs.getString("permit_id") + ":" +rs.getString("vehicle_number"));
+                    x = String.format("Select * from Visitor where permit_id = '%s' and vehicle_number = '%s'", rs.getString("permit_id"), rs.getString("vehicle_number"));
+                    rs = this.stmt.executeQuery(x);
+                    if(rs.next()){
+                        phone = rs.getString("Phone_number");
+                    }
+                }
+                else{
+                    System.out.println(rs.getString("permit_id") + ":" + rs.getString("vehicle_number"));
+                    x = String.format("Select * from Non_Visitor where permit_id = '%s' and vehicle_number = '%s'", rs.getString("permit_id"), rs.getString("vehicle_number"));
+                    rs = this.stmt.executeQuery(x);
+                    if (rs.next()) {
+                        univ = rs.getString("unvid");
+                        System.out.println(univ);
+                    }
+                }
+                System.out.println(c);
+                this.stmt.execute(c);
+                ResultSet cs = this.stmt.executeQuery("select * from Citation where citation_no = (select max(citation_no) from citation)");
+                String ci_no="";
+                if(cs.next()){
+                    ci_no = cs.getString("citation_no");
+                }
+                String n = String.format("insert into Notification (citation_no, PhoneNumber, univ) values ('%s','%s','%s')", ci_no, phone, univ);
+                System.out.println(n);
+                this.stmt.execute(n);
+                System.out.println("Citation issued" + ci_no);
             }
-
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -551,6 +560,7 @@ public class Main {
             System.out.println("3. getVisitorPermit");
             System.out.println("Any other number to go back");
             int u = in.nextInt();
+            in.nextLine();
             switch (u){
                 case 1:
                     this.exitLot();
@@ -704,6 +714,7 @@ public class Main {
             System.out.println("4. Visitor");
             System.out.println("Any other number to exit");
             int u = in.nextInt();
+            in.nextLine();
             switch (u){
                 case 1:
                     o.loginUPS(u);
