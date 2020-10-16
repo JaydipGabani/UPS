@@ -44,21 +44,19 @@ public class Main {
         }
     }
     public void loginEmployee(int u){
-        Scanner input = new Scanner(System.in);
         System.out.println("Enter your univid");
-        int uni = input.nextInt();
+        int uni = in.nextInt();
         if (this.login(uni)) {
             this.employeeFunction();
         }
     }
 
     private void employeeFunction() {
-        Scanner input = new Scanner(System.in);
         while (true){
             System.out.println("1. ChangeVehicleList");
             System.out.println("2. PayCitation");
             System.out.println("Any other number to go back");
-            int u = input.nextInt();
+            int u = in.nextInt();
             switch (u){
                 case 1:
                     this.changeEmpVehicleList();
@@ -73,10 +71,9 @@ public class Main {
     }
 
     public void loginUPS(int u){
-        Scanner input = new Scanner(System.in);
         this.upsFunctions();
         System.out.println("Enter your univid");
-        int uni = input.nextInt();
+        int uni = in.nextInt();
         if (this.login(uni)){
             this.upsFunctions();
         }
@@ -84,9 +81,8 @@ public class Main {
     }
 
     public void loginStudent(int u){
-        Scanner input = new Scanner(System.in);
         System.out.println("Enter your univid");
-        int uni = input.nextInt();
+        int uni = in.nextInt();
         if (this.login(uni)) {
             this.studentFunction();
         }
@@ -116,12 +112,11 @@ public class Main {
     }
 
     private void studentFunction() {
-        Scanner input = new Scanner(System.in);
         while (true){
             System.out.println("1. ChangeVehicleList");
             System.out.println("2. PayCitation");
             System.out.println("Any other number to go back");
-            int u = input.nextInt();
+            int u = in.nextInt();
             switch (u){
                 case 1:
                     this.changeStudentVehicleList();
@@ -161,7 +156,6 @@ public class Main {
         //assignPermit()
         //CheckVValidParking()
         //CheckNVValidParking()
-        Scanner input = new Scanner(System.in);
         while(true){
             System.out.println("1. issueCitation");
             System.out.println("2. addLot");
@@ -173,7 +167,7 @@ public class Main {
             System.out.println("8. ChangeVehicleList");
             System.out.println("9. PayCitation");
             System.out.println("Any other number to go back");
-            int u = input.nextInt();
+            int u = in.nextInt();
             switch (u){
                 case 1:
                     this.issueCitation();
@@ -252,7 +246,7 @@ public class Main {
                String vehicleNumber = in.nextLine();
                this.stmt.executeUpdate("DELETE FROM Permit WHERE vehicle_number IS LIKE `" + vehicleNumber + "`");
            }
-           System.out.println("changeRmpVehicleList");
+           System.out.println("changeEmpVehicleList");
        } catch (SQLException throwables) {
            throwables.printStackTrace();
        }
@@ -357,11 +351,72 @@ public class Main {
     private void assignZoneToLot() {
 //        String name, String Designation, int numberOfSpaces, int beginNumber
         System.out.println("assignZoneToLot");
+        try {
+            System.out.println("Enter the name of the Lot: ");
+            String name = in.nextLine();
+            System.out.println("Enter the address of the Lot: ");
+            String address = in.nextLine();
+            System.out.println("Enter the current designation of the Lot: ");
+            String designation = in.nextLine();
+            System.out.println("Enter the new zone designation: ");
+            String newZone = in.nextLine();
+
+            System.out.println("Enter the starting space for the new zone: ");
+            int start_number = in.nextInt();
+
+            System.out.println("Enter the ending space for the new zone: ");
+            int last_number = in.nextInt();
+
+            String zones_update = "UPDATE spaces_tables SET zone = `"+newZone+"` WHERE name IS LIKE `"+name+"` and address IS LIKE `"+address+"` and zone_designation IS LIKE `"+designation+"` and space_number = ?";
+            PreparedStatement ps = this.conn.prepareStatement(zones_update);
+
+            for (int i = start_number;i<=last_number;i++) {
+                ps.setInt(1, i);
+                ps.addBatch();
+            }
+            int[] result = ps.executeBatch();
+            ps.close();
+
+            String newDesignation = designation + "/" + newZone;
+
+            String designation_update = "UPDATE spaces_tables SET zone_designation = `"+newDesignation+"` WHERE name IS LIKE `"+name+"` and address IS LIKE `"+address+"` and zone_designation IS LIKE `"+designation+"`";
+
+            this.stmt.executeUpdate(designation_update);
+
+        } catch (Exception throwables) {
+            throwables.printStackTrace();
+        }
     }
 
     private void addLot() {
-//        String name, String address, int numberOfSpaces, int beginNumber, String initialDesignation
+//        String name, String address, int numberOfSpaces, String initialDesignation
         System.out.println("addLot");
+        try {
+            System.out.println("Enter the name of the new lot: ");
+            String name = in.nextLine();
+            System.out.println("Enter the address of the new lot: ");
+            String address = in.nextLine();
+            System.out.println("Enter the number of spaces in the new lot: ");
+            int numberOfSpaces = in.nextInt();
+            System.out.println("Enter the intitial zone designation of the new lot: ");
+            String initialDesignation = in.nextLine();
+            this.stmt.executeUpdate("INSERT INTO parking_lot_table VALUES("+initialDesignation+","+address+","+name+","+numberOfSpaces+","+")");
+
+            String spaces_insert = "INSERT INTO spaces_tables (space_number, zone, zone_designation, address, name) VALUES (?, ?, ?, ?, ?)";
+            PreparedStatement ps = this.conn.prepareStatement(spaces_insert);
+            for (int i = 1;i <= numberOfSpaces;i++) {
+                ps.setInt(1, i);
+                ps.setString(2, initialDesignation);
+                ps.setString(3, initialDesignation);
+                ps.setString(4, address);
+                ps.setString(5, name);
+                ps.addBatch();
+            }
+            int[] result = ps.executeBatch();
+            ps.close();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
     }
 
     private void issueCitation() {
@@ -472,13 +527,12 @@ public class Main {
     }
 
     public void visitorFunction(){
-        Scanner input = new Scanner(System.in);
         while(true){
             System.out.println("1. exitLot");
             System.out.println("2. PayCitation");
             System.out.println("3. getVisitorPermit");
             System.out.println("Any other number to go back");
-            int u = input.nextInt();
+            int u = in.nextInt();
             switch (u){
                 case 1:
                     this.exitLot();
@@ -562,7 +616,7 @@ public class Main {
             String notification_table = "CREATE TABLE Notification (citation_no number(10,0) NOT NULL, NotificationNumber NUMBER(10, 0) NOT NULL, PhoneNumber NUMBER(10, 0), univ NUMBER(10,0), PRIMARY KEY (NotificationNumber), FOREIGN KEY(citation_no) REFERENCES Citation (citation_no) ON DELETE CASCADE)";
             String noti_seq = "CREATE SEQUENCE Notification_seq START WITH 1 INCREMENT BY 1";
             //String vehicle_table = "CREATE TABLE Vehicle (car_manufacturer VARCHAR(20), model VARCHAR(10), year NUMBER(10, 0), color CHAR(20), vehicle_number NUMBER(10, 0), PRIMARY KEY (vehicle_number) ON DELETE CASCADE)";
-            String parking_lot_table = "CREATE TABLE Parking_Lots (zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20) UNIQUE, PRIMARY KEY (name, zone_designation, address))";
+            String parking_lot_table = "CREATE TABLE Parking_Lots (zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20) UNIQUE, number_of_spaces NUMBER(10, 0), PRIMARY KEY (name, zone_designation, address))";
 
             String spaces_tables = "CREATE TABLE Spaces(space_number NUMBER(10, 0) NOT NULL, zone VARCHAR(10), designated_type VARCHAR(10) DEFAULT  'regular' NOT NULL, constraint designated_type_ct check(designated_type in ('regular', 'electric', 'handi')), occupied varchar(3) default 'no', constraint op_check check (occupied in ('yes', 'no')), zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (name, zone_designation, address, space_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
 
@@ -622,7 +676,6 @@ public class Main {
 
     public static void main(String[] args) throws SQLException {
 	// write your code here
-        Scanner input = new Scanner(System.in);
         Main o = new Main();
 //        o.setupSchema();
         while(true) {
@@ -632,7 +685,7 @@ public class Main {
             System.out.println("3. Employee");
             System.out.println("4. Visitor");
             System.out.println("Any other number to exit");
-            int u = input.nextInt();
+            int u = in.nextInt();
             switch (u){
                 case 1:
                     o.loginUPS(u);
