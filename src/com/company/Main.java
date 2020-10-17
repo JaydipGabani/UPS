@@ -3,14 +3,18 @@ import com.sun.nio.sctp.AbstractNotificationHandler;
 import java.text.SimpleDateFormat;
 import java.sql.Timestamp;
 import java.util.Date;
-
+import java.util.UUID;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.time.LocalDate;
-
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.stream.StreamSupport;
 
 public class Main {
@@ -51,6 +55,15 @@ public class Main {
         }
     }
 
+    private String generatePermitID(String zone){
+        String permitid = String.valueOf(LocalDate.now().getYear());
+        permitid = permitid.substring(permitid.length() - 2, permitid.length());
+        permitid += zone;
+        UUID idOne = UUID.randomUUID();
+        permitid += String.valueOf(idOne);
+        permitid = permitid.substring(0,8);
+        return permitid;
+    }
     private void employeeFunction() {
         while (true){
             System.out.println("1. ChangeVehicleList");
@@ -575,29 +588,84 @@ public class Main {
             }
         }
     }
-//permit_id VARCHAR(8), zone VARCHAR(10), start_date DATE, space_type VARCHAR(10), expiry_date DATE, expiry_time TIMESTAMP(0), car_manufacturer VARCHAR(20), model VARCHAR(10), year NUMBER(10, 0), color CHAR(20), vehicle_number varchar(10), zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (permit_id, vehicle_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
+// VISITOR: permit_id varchar(8), vehicle_number varchar (10), Phone_number number(10,0), lot VARCHAR(5), space_number VARCHAR(20), PRIMARY KEY (vehicle_number, permit_id), FOREIGN KEY (permit_id, vehicle_number) REFERENCES Permit(permit_id, vehicle_number)ON DELETE CASCADE)";
+    //PERMIT: permit_id VARCHAR(8), zone VARCHAR(10), start_date DATE, space_type VARCHAR(10), expiry_date DATE, expiry_time TIMESTAMP(0), car_manufacturer VARCHAR(20), model VARCHAR(10), year NUMBER(10, 0), color CHAR(20), vehicle_number varchar(10), zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (permit_id, vehicle_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
+    //Parking_Lots (zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20) UNIQUE, number_of_spaces NUMBER(10, 0), PRIMARY KEY (name, zone_designation, address))";
+    //Spaces(space_number NUMBER(10, 0) NOT NULL, zone VARCHAR(10), designated_type VARCHAR(10) DEFAULT  'regular' NOT NULL, constraint designated_type_ct check(designated_type in ('regular', 'electric', 'handi')), occupied varchar(3) default 'no', constraint op_check check (occupied in ('yes', 'no')), zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (name, zone_designation, address, space_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
     private void getVisitorPermit() {
 //        String licensePlate, String type, String lotName, String duration
         try {
-            System.out.println("Permit Information:");
-            String query = "select * from Permit P where P.permit_id = `" + permitId + "`";
-            ResultSet rs = this.stmt.executeQuery(query);
+            System.out.println("Enter Name:");
+            String name = in.nextLine();
+            System.out.println("Enter Address");
+            String address = in.nextLine();
+            System.out.println("Enter Vehicle Number:");
+            String vehicle_number = in.nextLine();
+            System.out.println("Enter Phone Number:");
+            String phone_number = in.nextLine();
+            System.out.println("Enter Space Type:");
+            String space_type = in.nextLine();
+            System.out.println("Enter Car Color:");
+            String color = in.nextLine();
+            System.out.println("Enter Car Model:");
+            String model = in.nextLine();
+            System.out.println("Enter Car Manufacture Year:");
+            String car_manufacture_year = in.nextLine();
+            System.out.println("Enter Car Manufacturer:");
+            String car_manufacturer = in.nextLine();
+            System.out.println("Enter the number of hours for which you want parking permit:");
+            String requested_hours = in.nextLine();
+            //String name = "a", address = "a", zone_desi = "a";
+            LocalDate start_date = java.time.LocalDate.now();
+            LocalDate end_date = null;
+            Instant current_time = Instant.now();
+            Instant expiry_time = current_time.plus(Long.parseLong(requested_hours), ChronoUnit.HOURS);
+            //String expiry = expiry_time.toString();
+            //String[] parts = expiry.split("T");
+            LocalDate expiry_part1 = LocalDateTime.ofInstant(expiry_time, ZoneOffset.UTC).toLocalDate();
+//            LocalDate expiry_part1 = LocalDateTime.ofInstant(expiry_time, ZoneOffset.UTC).toLocalDate();
+            //Timestamp expiry_part1 = Timestamp.from(expiry_time);
+
+//             = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(expiry_part1);
+//            System.out.println(formatted);
+//            Timestamp expiry_part2 = Timestamp.from(expiry_time); // 034556
+            boolean flag = false;
+            //String query_parkinglots = "select P.zone_designation from Parking_Lots P where P.name = `" + name + "` and P.address = `"+ address + "` and P.zone_designation LIKE '%V%'";
+            String query_parkinglots = String.format("select P.zone_designation from Parking_Lots P where P.name = '%s' and P.address = '%s' and P.zone_designation LIKE ", name, address) + "'%V%'";
+            System.out.println(query_parkinglots);
+            ResultSet rs = this.stmt.executeQuery(query_parkinglots);
             while (rs.next()) {
                 //Retrieve by column name
-                String permitid = rs.getString("permit_id");
-                String zone = rs.getString("zone");
-                String start_date = rs.getString("start_date");
-                String space_type = rs.getString("space_type");
-                String expiry_date = rs.getString("expiry_date");
-                String expiry_time = rs.getString("expiry_time");
-                //Display values
-                System.out.print("Permit id: " + permitid);
-                System.out.print(", Zone: " + zone);
-                System.out.print(", Start Date: " + start_date);
-                System.out.println(", Space Type: " + space_type);
-                System.out.println(", Expiry Date: " + expiry_date);
-                System.out.println(", Expiry Time: " + expiry_time);
+                String zoneDesignation = rs.getString("zone_designation");
+                //String query_space = "select S.zone, S.space_number from Spaces where S.name = `" + name + "` and S.address = `"+ address + "`and S.zone_designation = `"+ zoneDesignation+"`and S.designated_type = `"+space_type+"`";
+                String query_space = String.format("select S.zone, S.space_number from Spaces S where S.name = '%s' and S.address = '%s' and S.zone_designation = '%s' and S.designated_type = '%s'", name, address, zoneDesignation, space_type);
+                ResultSet rs1 = this.stmt.executeQuery(query_space);
+                if (!rs1.isBeforeFirst() ) {
+//                    System.out.println("No data");
+                    continue;
+                }
+                else{
+                    while (rs1.next()) {
+                        String zone = rs1.getString("zone");
+                        String spaceNumber = rs1.getString("space_number");
+                        String permitID = generatePermitID("V");
+//                        System.out.println(permitID);
+//                        System.out.println(expiry_part2);
+//                        System.out.println(expiry_part1);
+
+                        String per = String.format("insert into Permit (permit_id, zone, start_date, space_type, expiry_date, expiry_time, car_manufacturer, model, year, color, vehicle_number, zone_designation, address, name) values('%s','%s',TO_DATE('%s','YYYY-MM-DD'),'%s',TO_DATE('%s','YYYY-MM-DD'),TO_TIMESTAMP('%s 23:59:00', 'YYYY-MM-DD HH24:MI:SS'),'%s','%s','%s','%s','%s','%s','%s','%s')", permitID, zone, start_date, space_type, expiry_part1, expiry_part1, car_manufacturer, model, car_manufacture_year, color, vehicle_number, zoneDesignation, address, name);
+                        this.stmt.executeUpdate(per);
+                        this.stmt.executeUpdate("UPDATE Spaces SET occupied = 'yes' where space_number =" + spaceNumber);
+                        flag = true;
+                        break;
+                    }
+                }
             }
+            if (!flag){
+                System.out.println("No space available");
+            }
+
+
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
