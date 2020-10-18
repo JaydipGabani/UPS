@@ -108,12 +108,17 @@ public class Main {
         // login logicNon_Visitor
         try{
             String s = String.format("select permit_id from Non_Visitor where unvid = '%s' and S_E = '%s'", uni, se);
+//            String s = "Select * from NON_VISITOR";
+            System.out.println(s);
             ResultSet rs = this.stmt.executeQuery(s);
             if(!rs.next()){
                 System.out.println("User doesn't exists");
                 return false;
             }
             else {
+//                while(rs.next()){
+//                    System.out.println(rs.getString("permit_id") + " " + rs.getString("unvid") + " " + rs.getString("S_E"));
+//                }
                     permitId = rs.getString("permit_id");
                     System.out.println(permitId);
                     return true;
@@ -385,13 +390,14 @@ public class Main {
         String license = in.nextLine();
 //        String query = "SELECT * FROM Visitor V, permit P WHERE P.expiry_time > '" +timestamp+ "', V.vehicle_number = '" +license+ "', V.lot = '" +lot+ "', V.space_number = '" +space_number+ "'";
         String query = String.format("SELECT * FROM Visitor WHERE space_number = '%s' and name = '%s' and address = '%s' and vehicle_number = '%s'", space_number, lot_name, lot_address, license);
+//        System.out.println(query);
 
-        boolean isResultSet = false;
         try {
-            isResultSet = this.stmt.execute(query);
-            if (isResultSet) {
+            ResultSet rs = this.stmt.executeQuery(query);
+            if (!rs.next()) {
                 System.out.println("Requested Car has a valid permit");
-            } else {
+            }
+            else {
                 System.out.println("Requested Car does not have a valid permit");
             }
         }catch(SQLException se){
@@ -537,8 +543,10 @@ public class Main {
         try{
             System.out.println("Enter Car number");
             String li = in.nextLine();
+            System.out.println("Enter Permit_id");
+            String pi = in.nextLine();
             // issue of having multiple permits belonging to same vehicle for visitor
-            ResultSet rs = this.stmt.executeQuery("SELECT * from Permit where vehicle_number = '"+li+"'");
+            ResultSet rs = this.stmt.executeQuery("SELECT * from Permit where vehicle_number = '"+li+"'" + "and PERMIT_ID = '" + pi +"'");
             if(!rs.next()){
                 System.out.println("Permit dont exists");
                 System.out.println("Enter Car model");
@@ -574,8 +582,6 @@ public class Main {
                 //Date d = new SimpleDateFormat("YYYY-MM-DD HH24:MI:SS").format(new Date());
                 String fees = "";
                 Date d = new Date();
-                System.out.println(d);
-                System.out.println(et);
                 if(et.after(d)){
 //                    System.out.println(et.toString());
 //                    System.out.println("Enter lot info to see if it is properly parked");
