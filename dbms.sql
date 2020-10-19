@@ -121,30 +121,30 @@ end;
 -- /
 -- 
 
-INSERT INTO Parking_Lots (zone_designation, address, name) values ('A/B/C', '123 test', 'test');
+INSERT INTO Parking_Lots (zone_designation, address, name) values ('A, B, C', '123 test', 'test');
 
-INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(1, 'A', 'regular', 'A/B/C', '123 test', 'test');
-INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(2, 'A', 'regular', 'A/B/C', '123 test', 'test');
-INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(3, 'A', 'regular', 'A/B/C', '123 test', 'test');
-INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(4, 'A', 'regular', 'A/B/C', '123 test', 'test');
-INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(5, 'A', 'regular', 'A/B/C', '123 test', 'test');
-INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(6, 'A', 'regular', 'A/B/C', '123 test', 'test');
+INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(1, 'A', 'regular', 'A, B, C', '123 test', 'test');
+INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(2, 'A', 'regular', 'A, B, C', '123 test', 'test');
+INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(3, 'A', 'regular', 'A, B, C', '123 test', 'test');
+INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(4, 'A', 'regular', 'A, B, C', '123 test', 'test');
+INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(5, 'A', 'regular', 'A, B, C', '123 test', 'test');
+INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(6, 'A', 'regular', 'A, B, C', '123 test', 'test');
 
-INSERT INTO Parking_Lots (zone_designation, address, name) values ('A/B/V', '124 test', 'test1');
+INSERT INTO Parking_Lots (zone_designation, address, name) values ('A, B, V', '124 test', 'test1');
 
-INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(1, 'V', 'regular', 'A/B/V', '124 test', 'test1');
-INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(2, 'V', 'regular', 'A/B/V', '124 test', 'test1');
-INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(3, 'V', 'regular', 'A/B/V', '124 test', 'test1');
-INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(4, 'V', 'regular', 'A/B/V', '124 test', 'test1');
-INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(5, 'V', 'regular', 'A/B/V', '124 test', 'test1');
+INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(1, 'V', 'regular', 'A, B, V', '124 test', 'test1');
+INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(2, 'V', 'regular', 'A, B, V', '124 test', 'test1');
+INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(3, 'V', 'regular', 'A, B, V', '124 test', 'test1');
+INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(4, 'V', 'regular', 'A, B, V', '124 test', 'test1');
+INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(5, 'V', 'regular', 'A, B, V', '124 test', 'test1');
 
 INSERT INTO Parking_Lots (zone_designation, address, name) values ('A/S/V', '125 test', 'test3');
 
-INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(1, 'S', 'regular', 'A/S/V', '125 test', 'test3');
-INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(2, 'S', 'regular', 'A/S/V', '125 test', 'test3');
-INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(3, 'S', 'regular', 'A/S/V', '125 test', 'test3');
-INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(4, 'S', 'regular', 'A/S/V', '125 test', 'test3');
-INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(5, 'S', 'regular', 'A/S/V', '125 test', 'test3');
+INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(1, 'S', 'regular', 'A, S, V', '125 test', 'test3');
+INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(2, 'S', 'regular', 'A, S, V', '125 test', 'test3');
+INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(3, 'S', 'regular', 'A, S, V', '125 test', 'test3');
+INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(4, 'S', 'regular', 'A, S, V', '125 test', 'test3');
+INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(5, 'S', 'regular', 'A, S, V', '125 test', 'test3');
 
 -- permit entry for emploee
 INSERT INTO Permit (permit_id, zone, start_date, expiry_date, expiry_time, car_manufacturer, model, year, color, vehicle_number) values ('20A12345', 'A', TO_DATE('2020-10-16','YYYY-MM-DD'), TO_DATE('2020-10-16','YYYY-MM-DD'), TO_TIMESTAMP('2021-10-15 23:59:59', 'YYYY-MM-DD HH24:MI:SS'), 'tesla', 'S', '2020','black','1234');
