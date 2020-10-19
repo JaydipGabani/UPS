@@ -18,7 +18,7 @@ CREATE SEQUENCE Citation_seq START WITH 1 INCREMENT BY 1;
 
 CREATE SEQUENCE Notification_seq START WITH 1 INCREMENT BY 1;
 
--- Trigger for citation_no and due date
+-- LIMIT THE NUMBER OF VEHICLES PER PERMIT FOR STUDENTS AND EMPLOYEE ACCORDINGLY FOR PERMIT
 create or replace trigger trg_permit
     before insert on PERMIT
     for each row
@@ -33,6 +33,7 @@ begin
     end if;
 end;
 
+-- LIMIT THE NUMBER OF VEHICLES PER PERMIT FOR STUDENTS AND EMPLOYEE ACCORDINGLY FOR NON_VISITOR
 create or replace trigger trg_non_visitor
     before insert on NON_VISITOR
     for each row
@@ -45,6 +46,7 @@ begin
     end if;
 end;
 
+-- AUTO INCREMENT CITATION NUMBER AND SET DUE DATE TO 30 DAYS FROM CITATION DATE
 create or replace trigger trg_citation
     before insert on Citation
     for each row
@@ -57,7 +59,7 @@ begin
     from dual;
 end;
 
--- Trigger for notification_no
+-- AUTO INCREMENT NOTIFICATION NUMBER
 create trigger trg_Notification
  before insert on Notification
    for each row
@@ -67,6 +69,7 @@ create trigger trg_Notification
       from dual;
   end;
 
+-- AUTO INSERT IN NOTIFICATION AFTER CITATION IS GENERATED
 create or replace trigger trg_ai_citation
     after insert on CITATION
     for each row
@@ -90,6 +93,17 @@ begin
         insert into NOTIFICATION (CITATION_NO, NOTIFICATIONNUMBER) values (CITATION_SEQ.currval, CITATION_SEQ.currval);
     end if;
 end;
+
+-- AUTO INSERT IN SPACES WITH FIRST ZONE DESIGNATION AS DEFAULT ZONE
+create or replace trigger trg_parking_lot
+    after insert on PARKING_LOTS
+    for each row
+begin
+    for i IN 1..:new.NUMBER_OF_SPACES loop
+            insert into SPACES (SPACE_NUMBER, ZONE, ZONE_DESIGNATION, ADDRESS, NAME) values (i, regexp_substr(:new.zone_designation, '[^,]+', 1, 1), :new.zone_designation, :new.ADDRESS, :new.name);
+        end loop;
+end;
+
 
 -- drop sequence Citation_seq;
 -- drop sequence Notification_seq;
