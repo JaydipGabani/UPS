@@ -26,8 +26,7 @@ public class Main {
     public static Scanner in = new Scanner(System.in);
 
     public Main() {
-        String jdbcURL
-                = "jdbc:oracle:thin:@orca.csc.ncsu.edu:1521:orcl01";
+        String jdbcURL = "jdbc:oracle:thin:@orca.csc.ncsu.edu:1521:orcl01";
         Connection conn = null;
         try {
             Class.forName("oracle.jdbc.OracleDriver");
@@ -229,13 +228,13 @@ public class Main {
            System.out.println("Do you want to add or remove a vehicle(a/r)?: ");
            String option = in.nextLine();
            if (option.equals("a")) {
-               ResultSet rs = this.stmt.executeQuery("SELECT * FROM Non_Visitor WHERE permit_id IS LIKE `" + permitId + "`");
+               ResultSet rs = this.stmt.executeQuery("SELECT * FROM Non_Visitor WHERE permit_id IS LIKE '" + permitId + "'");
                int size = 0;
                if (rs != null) {
                    rs.last();
                    size = rs.getRow();
                }
-               if (size < 5) {
+               if (size < 2) {
                    System.out.println("Enter the make of your car: ");
                    String car_manufacturer = in.nextLine();
                    System.out.println("Enter the model of your car: ");
@@ -246,7 +245,7 @@ public class Main {
                    String color = in.nextLine();
                    System.out.println("Enter the vehicle number of your car: ");
                    String vehicleNumber = in.nextLine();
-                   rs = this.stmt.executeQuery("SELECT * FROM Permit WHERE permit_id IS LIKE `" + permitId + "`");
+                   rs = this.stmt.executeQuery("SELECT * FROM Permit WHERE permit_id IS LIKE '" + permitId + "'");
                    if (rs.next()) {
                        String zone = rs.getString("zone");
                        String start_date = rs.getString("start_date");
@@ -261,10 +260,10 @@ public class Main {
                    System.out.println("The user already has 5 cars. Please remove one before adding any more.");
                }
            } else if (option.equals("r")) {
-               ResultSet rs = this.stmt.executeQuery("SELECT * FROM Non_Visitor WHERE permit_id IS LIKE `" + permitId + "`");
+               ResultSet rs = this.stmt.executeQuery("SELECT * FROM Non_Visitor WHERE permit_id IS LIKE '" + permitId + "'");
                System.out.println("Enter the vehicle number that you want to remove: ");
                String vehicleNumber = in.nextLine();
-               this.stmt.executeUpdate("DELETE FROM Permit WHERE vehicle_number IS LIKE `" + vehicleNumber + "`");
+               this.stmt.executeUpdate("DELETE FROM Permit WHERE vehicle_number IS LIKE '" + vehicleNumber + "'");
            }
            System.out.println("changeEmpVehicleList");
        } catch (SQLException throwables) {
@@ -352,15 +351,14 @@ public class Main {
                             } else {
                                 System.out.println("Requested Car does not have a valid permit");
                             }
-                            }
-                        else {
+                        } else {
                             if (zone.equals("S")){
                                 System.out.println("Requested Car does have a valid permit");
                             }
                             else{
                                 System.out.println("Requested Car does not have a valid permit");
                             }
-                            }
+                        }
 
 
 
@@ -489,7 +487,7 @@ public class Main {
             System.out.println("Enter the ending space for the new zone: ");
             int last_number = in.nextInt();
 
-            String zones_update = "UPDATE spaces SET zone = `"+newZone+"` WHERE name IS LIKE `"+name+"` and address IS LIKE `"+address+"` and zone_designation IS LIKE `"+designation+"` and space_number = ?";
+            String zones_update = "UPDATE spaces SET zone = '"+newZone+"' WHERE name IS LIKE '"+name+"' and address IS LIKE '"+address+"' and zone_designation IS LIKE '"+designation+"' and space_number = ?";
             PreparedStatement ps = this.conn.prepareStatement(zones_update);
 
             for (int i = start_number;i<=last_number;i++) {
@@ -501,7 +499,7 @@ public class Main {
 
             String newDesignation = designation + "/" + newZone;
 
-            String designation_update = "UPDATE spaces SET zone_designation = `"+newDesignation+"` WHERE name IS LIKE `"+name+"` and address IS LIKE `"+address+"` and zone_designation IS LIKE `"+designation+"`";
+            String designation_update = "UPDATE spaces SET zone_designation = '"+newDesignation+"' WHERE name IS LIKE '"+name+"' and address IS LIKE '"+address+"' and zone_designation IS LIKE '"+designation+"'";
 
             this.stmt.executeUpdate(designation_update);
 
@@ -520,7 +518,7 @@ public class Main {
             String address = in.nextLine();
             System.out.println("Enter the number of spaces in the new lot: ");
             int numberOfSpaces = in.nextInt();
-            System.out.println("Enter the intitial zone designation of the new lot: ");
+            System.out.println("Enter the initial zone designation of the new lot: ");
             String initialDesignation = in.nextLine();
             this.stmt.executeUpdate("INSERT INTO parking_lot_table VALUES("+initialDesignation+","+address+","+name+","+numberOfSpaces+","+")");
 
@@ -570,7 +568,7 @@ public class Main {
                 String zone= in.nextLine();
                 LocalDate due=citation_date.plusDays(30);
                 String phone = "", univ = "";
-                String c = String.format("insert into Citation (citation_time, citation_date, car_license_nunber, violation_category, fees, Due, zone_designation, address, name, model, color) Values(TO_TIMESTAMP('%s','YYYY-MM-DD HH24:MI:SS'),To_Date('%s', 'YYYY-MM-DD'),'%s','%s','%s',TO_DATE('%s','YYYY-MM-DD'),'%s','%s','%s','%s','%s')", t, citation_date, li, violation_category, fees, due, zone, address, name, model, color);
+                String c = String.format("insert into Citation (citation_time, citation_date, car_license_number, violation_category, fees, Due, zone_designation, address, name, model, color) Values(TO_TIMESTAMP('%s','YYYY-MM-DD HH24:MI:SS'),To_Date('%s', 'YYYY-MM-DD'),'%s','%s','%s',TO_DATE('%s','YYYY-MM-DD'),'%s','%s','%s','%s','%s')", t, citation_date, li, violation_category, fees, due, zone, address, name, model, color);
                 System.out.println(c);
                 this.stmt.execute(c);
                 rs = this.stmt.executeQuery("select * from Citation where citation_no = (select max(citation_no) from citation)");
@@ -620,7 +618,7 @@ public class Main {
                 String address= in.nextLine();
                 System.out.println("Enter zone designation of the parking lot");
                 String zone= in.nextLine();
-                c = String.format("insert into Citation (citation_time, citation_date, car_license_nunber, violation_category, fees, Due, zone_designation, address, name, model, color) Values(TO_TIMESTAMP('%s','YYYY-MM-DD HH24:MI:SS'),To_Date('%s', 'YYYY-MM-DD'),'%s','%s','%s',TO_DATE('%s','YYYY-MM-DD'),'%s','%s','%s','%s','%s')", t, LocalDate.now(), li, "Expired", fees, LocalDate.now().plusDays(30), zone, address, name, rs.getString("model"), rs.getString("color"));
+                c = String.format("insert into Citation (citation_time, citation_date, car_license_number, violation_category, fees, Due, zone_designation, address, name, model, color) Values(TO_TIMESTAMP('%s','YYYY-MM-DD HH24:MI:SS'),To_Date('%s', 'YYYY-MM-DD'),'%s','%s','%s',TO_DATE('%s','YYYY-MM-DD'),'%s','%s','%s','%s','%s')", t, LocalDate.now(), li, "Expired", fees, LocalDate.now().plusDays(30), zone, address, name, rs.getString("model"), rs.getString("color"));
 
                 String phone = "", univ = "";
                 System.out.println("is this visitor parking? yes/no");
@@ -783,7 +781,38 @@ public class Main {
 
     private void exitLot() {
 //        String permitNumber
-        System.out.println("exitLot");
+        try {
+            System.out.println("Enter the permit number: ");
+            String permit = in.nextLine();
+            ResultSet rs_permit = this.stmt.executeQuery("SELECT * FROM Permit WHERE permit_id IS LIKE '"+permit+"'");
+            ResultSet rs_visit = this.stmt.executeQuery("SELECT * FROM Visitor WHERE permit_id IS LIKE '"+permit+"'");
+            this.stmt.executeUpdate(String.format("UPDATE Spaces SET occupied = 'no' WHERE name = '%s' and zone_designation = '%s' and address = '%s' and space_number = '%s'", rs_visit.getString("name"), rs_visit.getString("zone_designation"), rs_visit.getString("address"), rs_visit.getInt("space_number")));
+            Date et = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(rs_permit.getString("expiry_time"));
+            Date now = new Date();
+            String fees = "25";
+            if (et.after(now)) {
+                System.out.println("No Time Overage !!");
+            } else {
+                System.out.println("Permit expired");
+                String t = new Timestamp(System.currentTimeMillis()).toString().split("\\.")[0];
+
+                String cite = String.format("INSERT INTO Citation (citation_time, citation_date, car_license_number, violation_category, fees, Due, zone_designation, address, name, model, color) Values(TO_TIMESTAMP('%s','YYYY-MM-DD HH24:MI:SS'),To_Date('%s', 'YYYY-MM-DD'),'%s','%s','%s',TO_DATE('%s','YYYY-MM-DD'),'%s','%s','%s','%s','%s')", t, LocalDate.now(), rs_visit.getString("vehicle_number"), "Expired", fees, LocalDate.now().plusDays(30), rs_visit.getString("zone_designation"), rs_visit.getString("address"), rs_visit.getString("name"), rs_permit.getString("model"), rs_permit.getString("color"));
+                System.out.println(cite);
+                this.stmt.executeUpdate(cite);
+                ResultSet cs = this.stmt.executeQuery("select * from Citation where citation_no = (select max(citation_no) from citation)");
+                String ci_no="";
+                if(cs.next()){
+                    ci_no = cs.getString("citation_no");
+                }
+                String n = String.format("insert into Notification (citation_no, PhoneNumber, univ) values ('%s','%s','%s')", ci_no, rs_visit.getString("Phone_number"), "");
+                System.out.println(n);
+                this.stmt.executeUpdate(n);
+                System.out.println("Citation issued: " + ci_no);
+            }
+            System.out.println("exitLot");
+        } catch (SQLException | ParseException throwables) {
+            throwables.printStackTrace();
+        }
     }
 
 
@@ -804,7 +833,7 @@ public class Main {
 //            String citation_table = "CREATE TABLE Citation (citation_time TIMESTAMP(0), citation_date DATE, car_license_number VARCHAR(50), citation_no NUMBER(10,0) NOT NULL, violation_category VARCHAR(5), fees NUMBER(10, 0), PRIMARY KEY (citation_no))";
             String citation_seq = "CREATE SEQUENCE Citation_seq START WITH 1 INCREMENT BY 1";
 
-            String citation_table = "CREATE TABLE Citation (model varchar(10), color char(20), citation_time TIMESTAMP(0), citation_date DATE, car_license_nunber VARCHAR(50), citation_no NUMBER(10, 0) NOT NULL, violation_category VARCHAR(10), constraint vio_check check(violation_category in ('Invalid', 'Expired', 'No Permit')), fees NUMBER(10, 0) NOT NULL, constraint fees_check check (fees in ('20', '25', '40')), Due DATE, status NUMBER(1,0) DEFAULT 0, zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (citation_no), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
+            String citation_table = "CREATE TABLE Citation (model varchar(10), color char(20), citation_time TIMESTAMP(0), citation_date DATE, car_license_number VARCHAR(50), citation_no NUMBER(10, 0) NOT NULL, violation_category VARCHAR(10), constraint vio_check check(violation_category in ('Invalid', 'Expired', 'No Permit')), fees NUMBER(10, 0) NOT NULL, constraint fees_check check (fees in ('20', '25', '40')), Due DATE, status NUMBER(1,0) DEFAULT 0, zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (citation_no), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
 
             String notification_table = "CREATE TABLE Notification (citation_no number(10,0) NOT NULL, NotificationNumber NUMBER(10, 0) NOT NULL, PhoneNumber NUMBER(10, 0), univ NUMBER(10,0), PRIMARY KEY (NotificationNumber), FOREIGN KEY(citation_no) REFERENCES Citation (citation_no) ON DELETE CASCADE)";
             String noti_seq = "CREATE SEQUENCE Notification_seq START WITH 1 INCREMENT BY 1";
