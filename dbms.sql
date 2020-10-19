@@ -1,14 +1,14 @@
 
 
-CREATE TABLE Parking_Lots (zone_designation VARCHAR(100), address VARCHAR(50), name VARCHAR(20) UNIQUE, number_of_spaces NUMBER(10, 0), PRIMARY KEY (name, zone_designation, address));
+CREATE TABLE Parking_Lots (zone_designation VARCHAR(100) NOT NULL, address VARCHAR(50) NOT NULL, name VARCHAR(20) UNIQUE NOT NULL, number_of_spaces NUMBER(10, 0) NOT NULL, PRIMARY KEY (name, zone_designation, address));
 
 CREATE TABLE Spaces(space_number NUMBER(10, 0) NOT NULL, zone VARCHAR(10) NOT NULL, constraint zone_ck check(zone in ('A', 'B', 'C', 'D','S', 'DS','BS', 'AS','V','CS','R')), designated_type VARCHAR(10) DEFAULT  'regular' NOT NULL, constraint designated_type_ct check(designated_type in ('regular', 'electric', 'handi')), occupied varchar(3) default 'no', constraint op_check check (occupied in ('yes', 'no')), zone_designation VARCHAR(100), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (name, zone_designation, address, space_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE);
 
-CREATE TABLE Permit (permit_id VARCHAR(8), zone VARCHAR(10), start_date DATE, space_type VARCHAR(10) default 'regular', constraint space_type_ct check(space_type in ('regular', 'electric', 'handi')), expiry_date DATE, expiry_time TIMESTAMP(2), car_manufacturer VARCHAR(20), model VARCHAR(10), year NUMBER(10, 0), color CHAR(20), vehicle_number varchar(10), PRIMARY KEY (permit_id, vehicle_number));
+CREATE TABLE Permit (permit_id VARCHAR(8) NOT NULL, zone VARCHAR(10) NOT NULL, start_date DATE default sysdate NOT NULL, space_type VARCHAR(10) default 'regular', constraint space_type_ct check(space_type in ('regular', 'electric', 'handi')), expiry_date DATE NOT NULL, constraint ed_check check ( expiry_date <= ADD_MONTHS(start_date, 12) ), expiry_time TIMESTAMP(2), car_manufacturer VARCHAR(20) NOT NULL, model VARCHAR(10) NOT NULL, year NUMBER(10, 0) NOT NULL, color CHAR(20) NOT NULL, vehicle_number varchar(10) NOT NULL, PRIMARY KEY (permit_id, vehicle_number));
 
 CREATE TABLE Non_Visitor(unvid NUMBER(10, 0), permit_id varchar(8), vehicle_number varchar(10), S_E varchar(2) default 'S' NOT NULL, constraint se_check check (S_E in ('S', 'E')), PRIMARY KEY(permit_id, vehicle_number), FOREIGN KEY (permit_id, vehicle_number) REFERENCES Permit(permit_id, vehicle_number) ON DELETE CASCADE);
 
-CREATE TABLE Visitor(permit_id varchar(8) NOT NULL , vehicle_number varchar (10) NOT NULL , Phone_number number(10,0) NOT NULL, zone_designation VARCHAR(100), address VARCHAR(50), name VARCHAR(20), space_number VARCHAR(20), PRIMARY KEY (vehicle_number, permit_id), FOREIGN KEY (permit_id, vehicle_number) REFERENCES Permit(permit_id, vehicle_number)ON DELETE CASCADE , FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE);
+CREATE TABLE Visitor(permit_id varchar(8) NOT NULL, vehicle_number varchar (10) NOT NULL , Phone_number number(10,0) NOT NULL, zone_designation VARCHAR(100), address VARCHAR(50), name VARCHAR(20), space_number VARCHAR(20), PRIMARY KEY (vehicle_number, permit_id), FOREIGN KEY (permit_id, vehicle_number) REFERENCES Permit(permit_id, vehicle_number)ON DELETE CASCADE , FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE);
 
 CREATE TABLE Citation (model varchar(10) NOT NULL, color char(20) NOT NULL, citation_time TIMESTAMP(0) NOT NULL, citation_date DATE default SYSDATE NOT NULL, car_license_nunber VARCHAR(50) NOT NULL, citation_no NUMBER(10, 0) NOT NULL, violation_category VARCHAR(10) NOT NULL, constraint vio_check check(violation_category in ('Invalid', 'Expired', 'No Permit')), fees NUMBER(10, 0) NOT NULL, constraint fees_check check (fees in ('20', '25', '40')), Due DATE NOT NULL, constraint check_due check ( Due = citation_date + 30 ), status NUMBER(1,0) DEFAULT 0 NOT NULL, zone_designation VARCHAR(100) NOT NULL, address VARCHAR(50) NOT NULL, name VARCHAR(20) NOT NULL, PRIMARY KEY (citation_no), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE);
 
@@ -19,6 +19,32 @@ CREATE SEQUENCE Citation_seq START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE Notification_seq START WITH 1 INCREMENT BY 1;
 
 -- Trigger for citation_no and due date
+create or replace trigger trg_permit
+    before insert on PERMIT
+    for each row
+declare n varchar(5);
+begin
+    select count(*) into n from PERMIT where PERMIT.PERMIT_ID = :new.permit_id and zone = :new.zone;
+    if :new.zone = 'S' and n >= 1 then RAISE_APPLICATION_ERROR(num => -20000, msg => 'You are at capacity to enter vehicles');
+    end if;
+    if :new.zone = 'V' and n >= 1 then RAISE_APPLICATION_ERROR(num => -20000, msg => 'You are at capacity to enter vehicles');
+    end if;
+    if n >= 2 then RAISE_APPLICATION_ERROR(num => -20000, msg => 'You are at capacity to enter vehicles');
+    end if;
+end;
+
+create or replace trigger trg_non_visitor
+    before insert on NON_VISITOR
+    for each row
+declare n number(5);
+begin
+    select count(*) into n from NON_VISITOR where PERMIT_ID = :new.permit_id;
+    if :new.S_E = 'E' and n >= 2 then RAISE_APPLICATION_ERROR(num => -20000, msg => 'You are at capacity to enter vehicles');
+    end if;
+    if :new.S_E = 'S' and n >= 1 then RAISE_APPLICATION_ERROR(num => -20000, msg => 'You are at capacity to enter vehicles');
+    end if;
+end;
+
 create or replace trigger trg_citation
     before insert on Citation
     for each row
@@ -30,7 +56,7 @@ begin
     into :new.Due
     from dual;
 end;
- /
+
 -- Trigger for notification_no
 create trigger trg_Notification
  before insert on Notification
@@ -40,7 +66,30 @@ create trigger trg_Notification
       into :new.NotificationNumber
       from dual;
   end;
- /
+
+create or replace trigger trg_ai_citation
+    after insert on CITATION
+    for each row
+declare
+    phone number(10);
+    univid number(10);
+    n number(10);
+begin
+    select count(*) into n from NON_VISITOR where VEHICLE_NUMBER = :new.CAR_LICENSE_NUNBER;
+    if n > 0 then
+        select UNVID into univid from NON_VISITOR where VEHICLE_NUMBER = :new.CAR_LICENSE_NUNBER and ROWNUM <= 1;
+        insert into NOTIFICATION (CITATION_NO, NOTIFICATIONNUMBER, UNIV) values (CITATION_SEQ.currval, CITATION_SEQ.currval, univid);
+    end if;
+    select count(*) into n from VISITOR where VEHICLE_NUMBER = :new.CAR_LICENSE_NUNBER;
+    if n > 0 then
+        select PHONE_NUMBER into phone from VISITOR where VEHICLE_NUMBER = :new.CAR_LICENSE_NUNBER and ROWNUM <= 1;
+        insert into NOTIFICATION (CITATION_NO, NOTIFICATIONNUMBER, PHONENUMBER) values (CITATION_SEQ.currval, CITATION_SEQ.currval, phone);
+    end if;
+    select count(*) into n from PERMIT where VEHICLE_NUMBER = :new.CAR_LICENSE_NUNBER;
+    if n = 0 then
+        insert into NOTIFICATION (CITATION_NO, NOTIFICATIONNUMBER) values (CITATION_SEQ.currval, CITATION_SEQ.currval);
+    end if;
+end;
 
 -- drop sequence Citation_seq;
 -- drop sequence Notification_seq;
