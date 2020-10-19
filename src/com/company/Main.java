@@ -423,7 +423,7 @@ public class Main {
             String li = in.nextLine();
             System.out.println("Generated permit id is");
             // call generate permit id
-            String permit = in.nextLine();
+            String permit = this.generatePermitID(zone);
             System.out.println("Enter color of the vehicle");
             String color = in.nextLine();
             System.out.println("Enter modla of the vehicle");
