@@ -8,9 +8,9 @@ CREATE TABLE Permit (permit_id VARCHAR(8), zone VARCHAR(10), start_date DATE, sp
 
 CREATE TABLE Non_Visitor(unvid NUMBER(10, 0), permit_id varchar(8), vehicle_number varchar(10), S_E varchar(2) default 'S' NOT NULL, constraint se_check check (S_E in ('S', 'E')), PRIMARY KEY(permit_id, vehicle_number), FOREIGN KEY (permit_id, vehicle_number) REFERENCES Permit(permit_id, vehicle_number) ON DELETE CASCADE);
 
-CREATE TABLE Visitor(permit_id varchar(8), vehicle_number varchar (10), Phone_number number(10,0) NOT NULL, zone_designation VARCHAR(100), address VARCHAR(50), name VARCHAR(20), space_number VARCHAR(20), PRIMARY KEY (vehicle_number, permit_id), FOREIGN KEY (permit_id, vehicle_number) REFERENCES Permit(permit_id, vehicle_number)ON DELETE CASCADE , FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE);
+CREATE TABLE Visitor(permit_id varchar(8) NOT NULL , vehicle_number varchar (10) NOT NULL , Phone_number number(10,0) NOT NULL, zone_designation VARCHAR(100), address VARCHAR(50), name VARCHAR(20), space_number VARCHAR(20), PRIMARY KEY (vehicle_number, permit_id), FOREIGN KEY (permit_id, vehicle_number) REFERENCES Permit(permit_id, vehicle_number)ON DELETE CASCADE , FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE);
 
-CREATE TABLE Citation (model varchar(10), color char(20), citation_time TIMESTAMP(0), citation_date DATE, car_license_nunber VARCHAR(50), citation_no NUMBER(10, 0) NOT NULL, violation_category VARCHAR(10), constraint vio_check check(violation_category in ('Invalid', 'Expired', 'No Permit')), fees NUMBER(10, 0) NOT NULL, constraint fees_check check (fees in ('20', '25', '40')), Due DATE, status NUMBER(1,0) DEFAULT 0, zone_designation VARCHAR(100), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (citation_no), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE);
+CREATE TABLE Citation (model varchar(10) NOT NULL, color char(20) NOT NULL, citation_time TIMESTAMP(0) NOT NULL, citation_date DATE default SYSDATE NOT NULL, car_license_nunber VARCHAR(50) NOT NULL, citation_no NUMBER(10, 0) NOT NULL, violation_category VARCHAR(10) NOT NULL, constraint vio_check check(violation_category in ('Invalid', 'Expired', 'No Permit')), fees NUMBER(10, 0) NOT NULL, constraint fees_check check (fees in ('20', '25', '40')), Due DATE NOT NULL, constraint check_due check ( Due = citation_date + 30 ), status NUMBER(1,0) DEFAULT 0 NOT NULL, zone_designation VARCHAR(100) NOT NULL, address VARCHAR(50) NOT NULL, name VARCHAR(20) NOT NULL, PRIMARY KEY (citation_no), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE);
 
 CREATE TABLE Notification (citation_no number(10,0) NOT NULL, NotificationNumber NUMBER(10, 0) NOT NULL, PhoneNumber NUMBER(10, 0), univ NUMBER(10,0), PRIMARY KEY (NotificationNumber), FOREIGN KEY(citation_no) REFERENCES Citation (citation_no) ON DELETE CASCADE);
 
@@ -18,15 +18,18 @@ CREATE SEQUENCE Citation_seq START WITH 1 INCREMENT BY 1;
 
 CREATE SEQUENCE Notification_seq START WITH 1 INCREMENT BY 1;
 
--- Trigger for citation_no
-create trigger trg_citation
- before insert on Citation
-   for each row
-  begin
+-- Trigger for citation_no and due date
+create or replace trigger trg_citation
+    before insert on Citation
+    for each row
+begin
     select Citation_seq.nextval
-      into :new.citation_no
-      from dual;
-  end;
+    into :new.citation_no
+    from dual;
+    select :new.citation_date + 30
+    into :new.Due
+    from dual;
+end;
  /
 -- Trigger for notification_no
 create trigger trg_Notification

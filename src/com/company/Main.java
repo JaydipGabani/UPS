@@ -394,7 +394,11 @@ public class Main {
 
         try {
             ResultSet rs = this.stmt.executeQuery(query);
-            if (!rs.next()) {
+            if (rs.next()) {
+//                query = String.format("SELECT permit_id FROM Visitor WHERE space_number = '%s' and name = '%s' and address = '%s' and vehicle_number = '%s'", space_number, lot_name, lot_address, license);
+//                String pi = rs.getString("permit_id");
+//                String s = String.format("select * from PERMIT where permit_id in ('%s') and vehicle_number = '%s'", query, license);
+//                System.out.println(s);
                 System.out.println("Requested Car has a valid permit");
             }
             else {
@@ -727,7 +731,7 @@ public class Main {
                 //Retrieve by column name
                 String zoneDesignation = rs.getString("zone_designation");
                 //String query_space = "select S.zone, S.space_number from Spaces where S.name = `" + name + "` and S.address = `"+ address + "`and S.zone_designation = `"+ zoneDesignation+"`and S.designated_type = `"+space_type+"`";
-                String query_space = String.format("select S.zone, S.space_number from Spaces S where S.name = '%s' and S.address = '%s' and S.zone_designation = '%s' and S.designated_type = '%s'", name, address, zoneDesignation, space_type);
+                String query_space = String.format("select S.zone, S.space_number from Spaces S where S.name = '%s' and S.address = '%s' and S.zone_designation = '%s' and S.designated_type = '%s' and S.occupied = 'no'", name, address, zoneDesignation, space_type);
                 ResultSet rs1 = this.stmt.executeQuery(query_space);
                 if (!rs1.isBeforeFirst() ) {
 //                    System.out.println("No data");
