@@ -305,8 +305,9 @@ public class Main {
                     String query_permit = String.format("SELECT zone FROM Permit WHERE permit_id = '%s'", permit_id);
                     ResultSet rs1 = this.stmt.executeQuery(query_permit);
                     while (rs1.next()){
-                        String zone = rs1.getString("zone");
-                        String queryParkingLot = String.format("SELECT * FROM Parking_Lots WHERE name = '%s' and address = '%s' and zone LIKE", lot_name, lot_address) + "'%"+zone+"%'";
+                        String zone = rs1.getString("ZONE");
+                        System.out.println(zone);
+                        String queryParkingLot = String.format("SELECT * FROM Parking_Lots WHERE name = '%s' and address = '%s' and zone_designation LIKE ", lot_name, lot_address) + "'%"+zone+"%'";
                         boolean rs2 = this.stmt.execute(queryParkingLot);
                         if(rs2){
                             System.out.println("Requested Car does have a valid permit");
@@ -344,7 +345,7 @@ public class Main {
 //                        while (rs4.next()) {
 //                            String zone = rs4.getString("zone");
                         if (dateFormat.parse(dateFormat.format(current_time)).after(dateFormat.parse("17:00")) && dateFormat.parse(dateFormat.format(current_time)).before(dateFormat.parse("09:00"))) {
-                            String queryParkingLot = String.format("SELECT * FROM Parking_Lots WHERE name = '%s' and address = '%s' and zone LIKE", lot_name, lot_address) + "'%" + zone + "%'";
+                            String queryParkingLot = String.format("SELECT * FROM Parking_Lots WHERE name = '%s' and address = '%s' and zone_designation LIKE ", lot_name, lot_address) + "'%" + zone + "%'";
                             boolean rs2 = this.stmt.execute(queryParkingLot);
                             if (rs2) {
                                 System.out.println("Requested Car does have a valid permit");
