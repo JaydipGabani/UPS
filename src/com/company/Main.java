@@ -273,9 +273,9 @@ public class Main {
 
 //    String parking_lot_table = "CREATE TABLE Parking_Lots (zone_designation VARCHAR(100), address VARCHAR(50), name VARCHAR(20) UNIQUE, number_of_spaces NUMBER(10, 0), PRIMARY KEY (name, zone_designation, address))";
 //
-//    String spaces_tables = "CREATE TABLE Spaces(space_number NUMBER(10, 0) NOT NULL, zone VARCHAR(10) NOT NULL, constraint zone_ck check(zone in ('A', 'B', 'C', 'D','S', 'DS','BS', 'AS','V','CS','R')), designated_type VARCHAR(10) DEFAULT  'regular' NOT NULL, constraint designated_type_ct check(designated_type in ('regular', 'electric', 'handi')), occupied varchar(3) default 'no', constraint op_check check (occupied in ('yes', 'no')), zone_designation VARCHAR(100), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (name, zone_designation, address, space_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
+//    String spaces_tables = "CREATE TABLE Spaces(space_number NUMBER(10, 0) NOT NULL, zone VARCHAR(10) NOT NULL, constraint zone_ck check(zone in ('A', 'B', 'C', 'D','S', 'DS','BS', 'AS','V','CS','R')), designated_type VARCHAR(10) DEFAULT  'regular' NOT NULL, constraint designated_type_ct check(designated_type in ('regular', 'electric', 'handicapped')), occupied varchar(3) default 'no', constraint op_check check (occupied in ('yes', 'no')), zone_designation VARCHAR(100), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (name, zone_designation, address, space_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
 //
-//    String permit_table = "CREATE TABLE Permit (permit_id VARCHAR(8), zone VARCHAR(10), start_date DATE, space_type VARCHAR(10) default 'regular', constraint space_type_ct check(space_type in ('regular', 'electric', 'handi')), expiry_date DATE, expiry_time TIMESTAMP(2), car_manufacturer VARCHAR(20), model VARCHAR(10), year NUMBER(10, 0), color CHAR(20), vehicle_number varchar(10), PRIMARY KEY (permit_id, vehicle_number))";
+//    String permit_table = "CREATE TABLE Permit (permit_id VARCHAR(8), zone VARCHAR(10), start_date DATE, space_type VARCHAR(10) default 'regular', constraint space_type_ct check(space_type in ('regular', 'electric', 'handicapped')), expiry_date DATE, expiry_time TIMESTAMP(2), car_manufacturer VARCHAR(20), model VARCHAR(10), year NUMBER(10, 0), color CHAR(20), vehicle_number varchar(10), PRIMARY KEY (permit_id, vehicle_number))";
 //
 //    String non_visitor_table = "CREATE TABLE Non_Visitor(unvid NUMBER(10, 0), permit_id varchar(8), vehicle_number varchar(10), S_E varchar(2) default 'S' NOT NULL, constraint se_check check (S_E in ('S', 'E')), PRIMARY KEY(permit_id, vehicle_number), FOREIGN KEY (permit_id, vehicle_number) REFERENCES Permit(permit_id, vehicle_number) ON DELETE CASCADE)";
 //
@@ -416,7 +416,7 @@ public class Main {
             System.out.println("Enter Zone");
             String zone = in.nextLine();
 
-            System.out.println("enter space type (regular, electric, handi)");
+            System.out.println("enter space type (regular, electric, handicapped)");
             String type = in.nextLine();
 
             System.out.println("Enter vehicle number");
@@ -666,7 +666,7 @@ public class Main {
                 }
                 String n = String.format("insert into Notification (citation_no, PhoneNumber, univ) values ('%s','%s','%s')", ci_no, phone, univ);
                 System.out.println(n);
-                this.stmt.execute(n);
+//                this.stmt.execute(n);
                 System.out.println("Citation issued" + ci_no);
             }
         } catch (Exception e) {
@@ -699,7 +699,7 @@ public class Main {
 // VISITOR: permit_id varchar(8), vehicle_number varchar (10), Phone_number number(10,0), lot VARCHAR(5), space_number VARCHAR(20), PRIMARY KEY (vehicle_number, permit_id), FOREIGN KEY (permit_id, vehicle_number) REFERENCES Permit(permit_id, vehicle_number)ON DELETE CASCADE)";
     //PERMIT: permit_id VARCHAR(8), zone VARCHAR(10), start_date DATE, space_type VARCHAR(10), expiry_date DATE, expiry_time TIMESTAMP(0), car_manufacturer VARCHAR(20), model VARCHAR(10), year NUMBER(10, 0), color CHAR(20), vehicle_number varchar(10), zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (permit_id, vehicle_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
     //Parking_Lots (zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20) UNIQUE, number_of_spaces NUMBER(10, 0), PRIMARY KEY (name, zone_designation, address))";
-    //Spaces(space_number NUMBER(10, 0) NOT NULL, zone VARCHAR(10), designated_type VARCHAR(10) DEFAULT  'regular' NOT NULL, constraint designated_type_ct check(designated_type in ('regular', 'electric', 'handi')), occupied varchar(3) default 'no', constraint op_check check (occupied in ('yes', 'no')), zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (name, zone_designation, address, space_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
+    //Spaces(space_number NUMBER(10, 0) NOT NULL, zone VARCHAR(10), designated_type VARCHAR(10) DEFAULT  'regular' NOT NULL, constraint designated_type_ct check(designated_type in ('regular', 'electric', 'handicapped')), occupied varchar(3) default 'no', constraint op_check check (occupied in ('yes', 'no')), zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (name, zone_designation, address, space_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
     private void getVisitorPermit() {
 //        String licensePlate, String type, String lotName, String duration
         try {
@@ -857,9 +857,9 @@ public class Main {
             //String vehicle_table = "CREATE TABLE Vehicle (car_manufacturer VARCHAR(20), model VARCHAR(10), year NUMBER(10, 0), color CHAR(20), vehicle_number NUMBER(10, 0), PRIMARY KEY (vehicle_number) ON DELETE CASCADE)";
             String parking_lot_table = "CREATE TABLE Parking_Lots (zone_designation VARCHAR(100), address VARCHAR(50), name VARCHAR(20) UNIQUE, number_of_spaces NUMBER(10, 0), PRIMARY KEY (name, zone_designation, address))";
 
-            String spaces_tables = "CREATE TABLE Spaces(space_number NUMBER(10, 0) NOT NULL, zone VARCHAR(10) NOT NULL, constraint zone_ck check(zone in ('A', 'B', 'C', 'D','S', 'DS','BS', 'AS','V','CS','R')), designated_type VARCHAR(10) DEFAULT  'regular' NOT NULL, constraint designated_type_ct check(designated_type in ('regular', 'electric', 'handi')), occupied varchar(3) default 'no', constraint op_check check (occupied in ('yes', 'no')), zone_designation VARCHAR(100), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (name, zone_designation, address, space_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
+            String spaces_tables = "CREATE TABLE Spaces(space_number NUMBER(10, 0) NOT NULL, zone VARCHAR(10) NOT NULL, constraint zone_ck check(zone in ('A', 'B', 'C', 'D','S', 'DS','BS', 'AS','V','CS','R')), designated_type VARCHAR(10) DEFAULT  'regular' NOT NULL, constraint designated_type_ct check(designated_type in ('regular', 'electric', 'handicapped')), occupied varchar(3) default 'no', constraint op_check check (occupied in ('yes', 'no')), zone_designation VARCHAR(100), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (name, zone_designation, address, space_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
 
-            String permit_table = "CREATE TABLE Permit (permit_id VARCHAR(8), zone VARCHAR(10), start_date DATE, space_type VARCHAR(10) default 'regular', constraint space_type_ct check(space_type in ('regular', 'electric', 'handi')), expiry_date DATE, expiry_time TIMESTAMP(2), car_manufacturer VARCHAR(20), model VARCHAR(10), year NUMBER(10, 0), color CHAR(20), vehicle_number varchar(10), PRIMARY KEY (permit_id, vehicle_number))";
+            String permit_table = "CREATE TABLE Permit (permit_id VARCHAR(8), zone VARCHAR(10), start_date DATE, space_type VARCHAR(10) default 'regular', constraint space_type_ct check(space_type in ('regular', 'electric', 'handicapped')), expiry_date DATE, expiry_time TIMESTAMP(2), car_manufacturer VARCHAR(20), model VARCHAR(10), year NUMBER(10, 0), color CHAR(20), vehicle_number varchar(10), PRIMARY KEY (permit_id, vehicle_number))";
 
             String non_visitor_table = "CREATE TABLE Non_Visitor(unvid NUMBER(10, 0), permit_id varchar(8), vehicle_number varchar(10), S_E varchar(2) default 'S' NOT NULL, constraint se_check check (S_E in ('S', 'E')), PRIMARY KEY(permit_id, vehicle_number), FOREIGN KEY (permit_id, vehicle_number) REFERENCES Permit(permit_id, vehicle_number) ON DELETE CASCADE)";
 
@@ -919,15 +919,38 @@ public class Main {
 //        o.setupSchema();
 //        try{
 //            for (int i = 1; i <= 150; i++){
-//                String s = String.format("insert into Spaces (space_number, zone, zone_designation, address, name) values ('%s', '%s', '%s', '%s', '%s')", i, 'A', "A, B, C, D", "2105 Daniel Allen St, NC 27505", "Freedom Lot");
-//                o.stmt.executeUpdate(s);
+//                String zone[] = {"A", "B", "C", "D"};
+//
+//                String s = String.format("insert into Spaces (space_number, zone, zone_designation, address, name) values ('%s', '%s', '%s', '%s', '%s');", i, zone[i/40], "A, B, C, D", "2105 Daniel Allen St, NC 27505", "Freedom Lot");
+//                System.out.println(s);
+////                o.stmt.executeUpdate(s);
 //            }
 //            for (int i = 1; i <= 175; i++){
-//                String s = String.format("insert into Spaces (space_number, zone, zone_designation, address, name) values ('%s', '%s', '%s', '%s', '%s')", i, 'A', "AS, BS, CS,DS, V" ,"2704 Ben Clark St, NC 26701","Justice Lot");
-//                o.stmt.executeUpdate(s);
+//                String zone[] = {"AS", "BS", "CS", "DS", "DS", "V"};
+//                String s = String.format("insert into Spaces (space_number, zone, zone_designation, address, name) values ('%s', '%s', '%s', '%s', '%s');", i, zone[i/35], "AS, BS, CS,DS, V" ,"2704 Ben Clark St, NC 26701","Justice Lot");
+//                if(i > 150)
+//                {
+//                    s = String.format("insert into Spaces (space_number, zone, zone_designation, address, name) values ('%s', '%s', '%s', '%s', '%s');", i, 'V', "AS, BS, CS,DS, V" ,"2704 Ben Clark St, NC 26701","Justice Lot");
+//                    if ( i > 150 && i < 156)
+//                    {
+//                        s = String.format("insert into Spaces (space_number, zone, zone_designation, address, name, designated_type) values ('%s', '%s', '%s', '%s', '%s', '%s');", i, 'V', "AS, BS, CS,DS, V" ,"2704 Ben Clark St, NC 26701","Justice Lot", "handicapped");
+//                    }
+//                    if ( i > 171 )
+//                    {
+//                        s = String.format("insert into Spaces (space_number, zone, zone_designation, address, name, designated_type) values ('%s', '%s', '%s', '%s', '%s', '%s');", i, 'V', "AS, BS, CS,DS, V" ,"2704 Ben Clark St, NC 26701","Justice Lot", "electric");
+//                    }
+//
+//                }
+//                System.out.println(s);
+////                o.stmt.executeUpdate(s);
 //            }
 //                for (int i = 1; i <= 200; i++){
-//                String s = String.format("insert into Spaces (space_number, zone, zone_designation, address, name) values ('%s', '%s', '%s', '%s', '%s')", i, 'A', "A, B, C, D, AS, BS, CS, DS, V", "2108 McKent St, NC 27507","Premiere Lot");
+//                                    String zone[] = {"A","B","C","D","AS", "BS", "CS", "DS", "DS"};
+//                String s = String.format("insert into Spaces (space_number, zone, zone_designation, address, name) values ('%s', '%s', '%s', '%s', '%s');", i, zone[i/25], "A, B, C, D, AS, BS, CS, DS, V", "2108 McKent St, NC 27507","Premiere Lot");
+//                if (i==200){
+//                    s = String.format("insert into Spaces (space_number, zone, zone_designation, address, name) values ('%s', '%s', '%s', '%s', '%s');", i, 'V', "A, B, C, D, AS, BS, CS, DS, V", "2108 McKent St, NC 27507","Premiere Lot");
+//                }
+//                System.out.println(s);
 //                o.stmt.executeUpdate(s);
 //            }
 //

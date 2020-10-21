@@ -2,7 +2,7 @@
 
 CREATE TABLE Parking_Lots (zone_designation VARCHAR(100) NOT NULL, address VARCHAR(50) NOT NULL, name VARCHAR(20) NOT NULL, number_of_spaces NUMBER(10, 0) NOT NULL, PRIMARY KEY (name, zone_designation, address));
 
-CREATE TABLE Spaces(space_number NUMBER(10, 0) NOT NULL, zone VARCHAR(10) NOT NULL, constraint zone_ck check(zone in ('A', 'B', 'C', 'D','S', 'DS','BS', 'AS','V','CS','R')), designated_type VARCHAR(20) DEFAULT  'regular' NOT NULL, constraint designated_type_ct check(designated_type in ('regular', 'electric', 'handicapped')), occupied varchar(3) default 'no', constraint op_check check (occupied in ('yes', 'no')), zone_designation VARCHAR(100), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (name, zone_designation, address, space_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE);
+CREATE TABLE Spaces(space_number NUMBER(10, 0) NOT NULL, zone VARCHAR(10) NOT NULL, constraint zone_ck check(zone in ('A', 'B', 'C', 'D','S', 'DS','BS', 'AS','V','CS','R')), designated_type VARCHAR(20) DEFAULT  'regular' NOT NULL, constraint designated_type_ct check(designated_type in ('regular', 'electric', 'handicapped')), occupied varchar(3) default 'no' NOT NULL, constraint op_check check (occupied in ('yes', 'no')), zone_designation VARCHAR(100) NOT NULL, address VARCHAR(50) NOT NULL, name VARCHAR(20) NOT NULL, PRIMARY KEY (name, zone_designation, address, space_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE);
 
 CREATE TABLE Permit (permit_id VARCHAR(8) NOT NULL, zone VARCHAR(10) NOT NULL, start_date DATE default sysdate NOT NULL, space_type VARCHAR(20) default 'regular', constraint space_type_ct check(space_type in ('regular', 'electric', 'handicapped')), expiry_date DATE NOT NULL, constraint ed_check check ( expiry_date <= ADD_MONTHS(start_date, 12) ), expiry_time TIMESTAMP(2), car_manufacturer VARCHAR(20) NOT NULL, model VARCHAR(10) NOT NULL, year NUMBER(10, 0) NOT NULL, color CHAR(20) NOT NULL, vehicle_number varchar(10) NOT NULL, PRIMARY KEY (permit_id, vehicle_number));
 
@@ -10,7 +10,7 @@ CREATE TABLE Non_Visitor(unvid NUMBER(10, 0), permit_id varchar(8), vehicle_numb
 
 CREATE TABLE Visitor(permit_id varchar(8) NOT NULL, vehicle_number varchar (10) NOT NULL , Phone_number number(10,0) NOT NULL, zone_designation VARCHAR(100), address VARCHAR(50), name VARCHAR(20), space_number VARCHAR(20), PRIMARY KEY (vehicle_number, permit_id), FOREIGN KEY (permit_id, vehicle_number) REFERENCES Permit(permit_id, vehicle_number)ON DELETE CASCADE , FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE);
 
-CREATE TABLE Citation (model varchar(10) NOT NULL, color char(20) NOT NULL, citation_time TIMESTAMP(0) NOT NULL, citation_date DATE default SYSDATE NOT NULL, car_license_number VARCHAR(50) NOT NULL, citation_no NUMBER(10, 0) NOT NULL, violation_category VARCHAR(10) NOT NULL, constraint vio_check check(violation_category in ('Invalid', 'Expired', 'No Permit')), fees NUMBER(10, 0) NOT NULL, constraint fees_check check (fees in ('20', '25', '40')), Due DATE NOT NULL, constraint check_due check ( Due = citation_date + 30 ), status NUMBER(1,0) DEFAULT 0 NOT NULL, zone_designation VARCHAR(100) NOT NULL, address VARCHAR(50) NOT NULL, name VARCHAR(20) NOT NULL, PRIMARY KEY (citation_no), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE);
+CREATE TABLE Citation (model varchar(10) NOT NULL, color char(20) NOT NULL, citation_time TIMESTAMP(0) NOT NULL, citation_date DATE default SYSDATE NOT NULL, car_license_number VARCHAR(50) NOT NULL, citation_no NUMBER(10, 0) NOT NULL, violation_category VARCHAR(10) NOT NULL, constraint vio_check check(violation_category in ('Invalid', 'Expired', 'No Permit')), fees NUMBER(10, 0) NOT NULL, constraint fees_check check (fees in ('20', '25', '40')), Due DATE NOT NULL, constraint check_due check ( Due = citation_date + 30 ), status NUMBER(1,0) DEFAULT 0 NOT NULL, constraint ck_status check (status in (0,1)),zone_designation VARCHAR(100) NOT NULL, address VARCHAR(50) NOT NULL, name VARCHAR(20) NOT NULL, PRIMARY KEY (citation_no), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE);
 
 CREATE TABLE Notification (citation_no number(10,0) NOT NULL, NotificationNumber NUMBER(10, 0) NOT NULL, PhoneNumber NUMBER(10, 0), univ NUMBER(10,0), PRIMARY KEY (NotificationNumber), FOREIGN KEY(citation_no) REFERENCES Citation (citation_no) ON DELETE CASCADE);
 
@@ -121,7 +121,7 @@ end;
 -- /
 -- 
 
-INSERT INTO Parking_Lots (zone_designation, address, name) values ('A, B, C', '123 test', 'test');
+INSERT INTO Parking_Lots (zone_designation, address, name, NUMBER_OF_SPACES) values ('A, B, C', '123 test', 'test', 100);
 
 INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(1, 'A', 'regular', 'A, B, C', '123 test', 'test');
 INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(2, 'A', 'regular', 'A, B, C', '123 test', 'test');
@@ -130,7 +130,7 @@ INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, addre
 INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(5, 'A', 'regular', 'A, B, C', '123 test', 'test');
 INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(6, 'A', 'regular', 'A, B, C', '123 test', 'test');
 
-INSERT INTO Parking_Lots (zone_designation, address, name) values ('A, B, V', '124 test', 'test1');
+INSERT INTO Parking_Lots (zone_designation, address, name, NUMBER_OF_SPACES) values ('A, B, V', '124 test', 'test1', 100);
 
 INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(1, 'V', 'regular', 'A, B, V', '124 test', 'test1');
 INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(2, 'V', 'regular', 'A, B, V', '124 test', 'test1');
@@ -138,7 +138,7 @@ INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, addre
 INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(4, 'V', 'regular', 'A, B, V', '124 test', 'test1');
 INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(5, 'V', 'regular', 'A, B, V', '124 test', 'test1');
 
-INSERT INTO Parking_Lots (zone_designation, address, name) values ('A, S, V', '125 test', 'test3');
+INSERT INTO Parking_Lots (zone_designation, address, name, NUMBER_OF_SPACES) values ('A, S, V', '125 test', 'test3', 100);
 
 INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(1, 'S', 'regular', 'A, S, V', '125 test', 'test3');
 INSERT INTO Spaces (space_number, zone, designated_type, zone_designation, address, name) values(2, 'S', 'regular', 'A, S, V', '125 test', 'test3');
