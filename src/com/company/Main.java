@@ -251,11 +251,12 @@ public class Main {
            System.out.println("Do you want to add or remove a vehicle(a/r)?: ");
            String option = in.nextLine();
            if (option.equals("a")) {
+               System.out.println(permitId);
+               System.out.println("SELECT * FROM Non_Visitor WHERE permit_id LIKE '" + permitId + "'");
                ResultSet rs = this.stmt.executeQuery("SELECT * FROM Non_Visitor WHERE permit_id LIKE '" + permitId + "'");
                int size = 0;
-               if (rs != null) {
-                   rs.last();
-                   size = rs.getRow();
+               while(rs.next()){
+                   ++size;
                }
                if (size < 2) {
                    System.out.println("Enter the make of your car: ");
@@ -280,10 +281,22 @@ public class Main {
                                + car_manufacturer + "," + model + "," + year + "," + color + "," + vehicleNumber + ")");
                    }
                } else {
-                   System.out.println("The user already has 5 cars. Please remove one before adding any more.");
+                   System.out.println("The user already has 2 cars. Please remove one before adding any more.");
                }
            } else if (option.equals("r")) {
                ResultSet rs = this.stmt.executeQuery("SELECT * FROM Non_Visitor WHERE permit_id LIKE '" + permitId + "'");
+               int size = 0;
+               while(rs.next()){
+                   ++size;
+               }
+               if(size == 1) {
+                   System.out.println("You have only one car with the permit. If you remove it your permit will be deleted.");
+                   System.out.println("Do you want to proceed (yes/no): ");
+                   String o = in.nextLine();
+                   if(o.equals("no")) {
+                       return;
+                   }
+               }
                System.out.println("Enter the vehicle number that you want to remove: ");
                String vehicleNumber = in.nextLine();
                this.stmt.executeUpdate("DELETE FROM Permit WHERE vehicle_number LIKE '" + vehicleNumber + "'");
@@ -296,9 +309,9 @@ public class Main {
 
 //    String parking_lot_table = "CREATE TABLE Parking_Lots (zone_designation VARCHAR(100), address VARCHAR(50), name VARCHAR(20) UNIQUE, number_of_spaces NUMBER(10, 0), PRIMARY KEY (name, zone_designation, address))";
 //
-//    String spaces_tables = "CREATE TABLE Spaces(space_number NUMBER(10, 0) NOT NULL, zone VARCHAR(10) NOT NULL, constraint zone_ck check(zone in ('A', 'B', 'C', 'D','S', 'DS','BS', 'AS','V','CS','R')), designated_type VARCHAR(10) DEFAULT  'regular' NOT NULL, constraint designated_type_ct check(designated_type in ('regular', 'electric', 'handi')), occupied varchar(3) default 'no', constraint op_check check (occupied in ('yes', 'no')), zone_designation VARCHAR(100), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (name, zone_designation, address, space_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
+//    String spaces_tables = "CREATE TABLE Spaces(space_number NUMBER(10, 0) NOT NULL, zone VARCHAR(10) NOT NULL, constraint zone_ck check(zone in ('A', 'B', 'C', 'D','S', 'DS','BS', 'AS','V','CS','R')), designated_type VARCHAR(10) DEFAULT  'regular' NOT NULL, constraint designated_type_ct check(designated_type in ('regular', 'electric', 'handicapped')), occupied varchar(3) default 'no', constraint op_check check (occupied in ('yes', 'no')), zone_designation VARCHAR(100), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (name, zone_designation, address, space_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
 //
-//    String permit_table = "CREATE TABLE Permit (permit_id VARCHAR(8), zone VARCHAR(10), start_date DATE, space_type VARCHAR(10) default 'regular', constraint space_type_ct check(space_type in ('regular', 'electric', 'handi')), expiry_date DATE, expiry_time TIMESTAMP(2), car_manufacturer VARCHAR(20), model VARCHAR(10), year NUMBER(10, 0), color CHAR(20), vehicle_number varchar(10), PRIMARY KEY (permit_id, vehicle_number))";
+//    String permit_table = "CREATE TABLE Permit (permit_id VARCHAR(8), zone VARCHAR(10), start_date DATE, space_type VARCHAR(10) default 'regular', constraint space_type_ct check(space_type in ('regular', 'electric', 'handicapped')), expiry_date DATE, expiry_time TIMESTAMP(2), car_manufacturer VARCHAR(20), model VARCHAR(10), year NUMBER(10, 0), color CHAR(20), vehicle_number varchar(10), PRIMARY KEY (permit_id, vehicle_number))";
 //
 //    String non_visitor_table = "CREATE TABLE Non_Visitor(unvid NUMBER(10, 0), permit_id varchar(8), vehicle_number varchar(10), S_E varchar(2) default 'S' NOT NULL, constraint se_check check (S_E in ('S', 'E')), PRIMARY KEY(permit_id, vehicle_number), FOREIGN KEY (permit_id, vehicle_number) REFERENCES Permit(permit_id, vehicle_number) ON DELETE CASCADE)";
 //
@@ -440,7 +453,7 @@ public class Main {
             System.out.println("Enter Zone");
             String zone = in.nextLine();
 
-            System.out.println("enter space type (regular, electric, handi)");
+            System.out.println("enter space type (regular, electric, handicapped)");
             String type = in.nextLine();
 
             System.out.println("Enter vehicle number");
@@ -690,7 +703,7 @@ public class Main {
                 }
                 String n = String.format("insert into Notification (citation_no, PhoneNumber, univ) values ('%s','%s','%s')", ci_no, phone, univ);
                 System.out.println(n);
-                this.stmt.execute(n);
+//                this.stmt.execute(n);
                 System.out.println("Citation issued" + ci_no);
             }
         } catch (Exception e) {
@@ -723,7 +736,7 @@ public class Main {
 // VISITOR: permit_id varchar(8), vehicle_number varchar (10), Phone_number number(10,0), lot VARCHAR(5), space_number VARCHAR(20), PRIMARY KEY (vehicle_number, permit_id), FOREIGN KEY (permit_id, vehicle_number) REFERENCES Permit(permit_id, vehicle_number)ON DELETE CASCADE)";
     //PERMIT: permit_id VARCHAR(8), zone VARCHAR(10), start_date DATE, space_type VARCHAR(10), expiry_date DATE, expiry_time TIMESTAMP(0), car_manufacturer VARCHAR(20), model VARCHAR(10), year NUMBER(10, 0), color CHAR(20), vehicle_number varchar(10), zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (permit_id, vehicle_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
     //Parking_Lots (zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20) UNIQUE, number_of_spaces NUMBER(10, 0), PRIMARY KEY (name, zone_designation, address))";
-    //Spaces(space_number NUMBER(10, 0) NOT NULL, zone VARCHAR(10), designated_type VARCHAR(10) DEFAULT  'regular' NOT NULL, constraint designated_type_ct check(designated_type in ('regular', 'electric', 'handi')), occupied varchar(3) default 'no', constraint op_check check (occupied in ('yes', 'no')), zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (name, zone_designation, address, space_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
+    //Spaces(space_number NUMBER(10, 0) NOT NULL, zone VARCHAR(10), designated_type VARCHAR(10) DEFAULT  'regular' NOT NULL, constraint designated_type_ct check(designated_type in ('regular', 'electric', 'handicapped')), occupied varchar(3) default 'no', constraint op_check check (occupied in ('yes', 'no')), zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (name, zone_designation, address, space_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
     private void getVisitorPermit() {
 //        String licensePlate, String type, String lotName, String duration
         try {
@@ -863,102 +876,44 @@ public class Main {
         }
     }
 
-
-
-    public void setupSchema(){
-
-        try{
-
-//            this.stmt.executeQuery("drop table Notification");
-//            this.stmt.executeQuery("drop table Citation");
-//            this.stmt.executeQuery("drop table Non_visitor");
-//            this.stmt.executeQuery("drop table Visitor");
-//            this.stmt.executeQuery("drop table Permit");
-//            this.stmt.executeQuery("drop table Spaces");
-//            this.stmt.executeQuery("drop table Parking_Lots");
-//            this.stmt.executeQuery("drop sequence Citaion_seq");
-//            this.stmt.executeQuery("drop sequence Notification_seq");
-//            String citation_table = "CREATE TABLE Citation (citation_time TIMESTAMP(0), citation_date DATE, car_license_number VARCHAR(50), citation_no NUMBER(10,0) NOT NULL, violation_category VARCHAR(5), fees NUMBER(10, 0), PRIMARY KEY (citation_no))";
-            String citation_seq = "CREATE SEQUENCE Citation_seq START WITH 1 INCREMENT BY 1";
-
-            String citation_table = "CREATE TABLE Citation (model varchar(10), color char(20), citation_time TIMESTAMP(0), citation_date DATE, car_license_number VARCHAR(50), citation_no NUMBER(10, 0) NOT NULL, violation_category VARCHAR(10), constraint vio_check check(violation_category in ('Invalid', 'Expired', 'No Permit')), fees NUMBER(10, 0) NOT NULL, constraint fees_check check (fees in ('20', '25', '40')), Due DATE, status NUMBER(1,0) DEFAULT 0, zone_designation VARCHAR(10), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (citation_no), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
-
-            String notification_table = "CREATE TABLE Notification (citation_no number(10,0) NOT NULL, NotificationNumber NUMBER(10, 0) NOT NULL, PhoneNumber NUMBER(10, 0), univ NUMBER(10,0), PRIMARY KEY (NotificationNumber), FOREIGN KEY(citation_no) REFERENCES Citation (citation_no) ON DELETE CASCADE)";
-            String noti_seq = "CREATE SEQUENCE Notification_seq START WITH 1 INCREMENT BY 1";
-            //String vehicle_table = "CREATE TABLE Vehicle (car_manufacturer VARCHAR(20), model VARCHAR(10), year NUMBER(10, 0), color CHAR(20), vehicle_number NUMBER(10, 0), PRIMARY KEY (vehicle_number) ON DELETE CASCADE)";
-            String parking_lot_table = "CREATE TABLE Parking_Lots (zone_designation VARCHAR(100), address VARCHAR(50), name VARCHAR(20) UNIQUE, number_of_spaces NUMBER(10, 0), PRIMARY KEY (name, zone_designation, address))";
-
-            String spaces_tables = "CREATE TABLE Spaces(space_number NUMBER(10, 0) NOT NULL, zone VARCHAR(10) NOT NULL, constraint zone_ck check(zone in ('A', 'B', 'C', 'D','S', 'DS','BS', 'AS','V','CS','R')), designated_type VARCHAR(10) DEFAULT  'regular' NOT NULL, constraint designated_type_ct check(designated_type in ('regular', 'electric', 'handi')), occupied varchar(3) default 'no', constraint op_check check (occupied in ('yes', 'no')), zone_designation VARCHAR(100), address VARCHAR(50), name VARCHAR(20), PRIMARY KEY (name, zone_designation, address, space_number), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
-
-            String permit_table = "CREATE TABLE Permit (permit_id VARCHAR(8), zone VARCHAR(10), start_date DATE, space_type VARCHAR(10) default 'regular', constraint space_type_ct check(space_type in ('regular', 'electric', 'handi')), expiry_date DATE, expiry_time TIMESTAMP(2), car_manufacturer VARCHAR(20), model VARCHAR(10), year NUMBER(10, 0), color CHAR(20), vehicle_number varchar(10), PRIMARY KEY (permit_id, vehicle_number))";
-
-            String non_visitor_table = "CREATE TABLE Non_Visitor(unvid NUMBER(10, 0), permit_id varchar(8), vehicle_number varchar(10), S_E varchar(2) default 'S' NOT NULL, constraint se_check check (S_E in ('S', 'E')), PRIMARY KEY(permit_id, vehicle_number), FOREIGN KEY (permit_id, vehicle_number) REFERENCES Permit(permit_id, vehicle_number) ON DELETE CASCADE)";
-
-            String visitor_table = "CREATE TABLE Visitor(permit_id varchar(8), vehicle_number varchar (10), Phone_number number(10,0) NOT NULL, zone_designation VARCHAR(100), address VARCHAR(50), name VARCHAR(20), space_number VARCHAR(20), PRIMARY KEY (vehicle_number, permit_id), FOREIGN KEY (permit_id, vehicle_number) REFERENCES Permit(permit_id, vehicle_number)ON DELETE CASCADE , FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE)";
-
-//            String employee_table = "CREATE TABLE Employee(unvid NUMBER(10, 0), permit_id NUMBER(10, 0), zone VARCHAR(10), start_date DATE, space_type VARCHAR(10), expiry_date DATE, expiry_time TIMESTAMP(0), primary_vehicle_number INT, flag VARCHAR(2), PRIMARY KEY(unvid, permit_id))";
-//            String student_table = "CREATE TABLE Student(unvid INT, permit_id INT, zone VARCHAR(10), start_date DATE, space_type VARCHAR(10), expiry_date DATE, expiry_time TIMESTAMP(0), primary_vehicle_number INT, PRIMARY KEY(unvid, permit_id))";
-//            String notify_relation = "CREATE TABLE Notify(CitationNumber INT NOT NULL, citation_no INT NOT NULL, PRIMARY KEY (CitationNumber, citation_no), FOREIGN KEY (citation_no) REFERENCES Citation(citation_no), FOREIGN KEY (CitationNumber) REFERENCES Notification(CitationNumber))";
-//            String issuedat_relation = "CREATE TABLE IssuedAt(name VARCHAR(20), citation_no INT, PRIMARY KEY (name, citation_no), FOREIGN KEY (name) REFERENCES Parking_Lots(name), FOREIGN KEY (citation_no) REFERENCES Citation(citation_no))";
-//            String issuedto_relation = "CREATE TABLE IssuedTo(citation_no INT, vehicle_number INT, PRIMARY KEY (vehicle_number, citation_no), FOREIGN KEY (citation_no) REFERENCES Citation(citation_no), FOREIGN KEY (vehicle_number) REFERENCES Vehicle(vehicle_number))";
-//            String owns1_relation = "CREATE TABLE Owns1(unvid INT, permit_id INT, vehicle_number INT, PRIMARY KEY (unvid, permit_id, vehicle_number), FOREIGN KEY (unvid, permit_id) REFERENCES Employee(unvid, permit_id), FOREIGN KEY (vehicle_number) REFERENCES Vehicle(vehicle_number))";
-//            String owns2_relation = "CREATE TABLE Owns2(unvid INT, permit_id INT, vehicle_number INT, PRIMARY KEY (unvid, permit_id, vehicle_number), FOREIGN KEY (unvid, permit_id) REFERENCES Student(unvid, permit_id), FOREIGN KEY (vehicle_number) REFERENCES Vehicle(vehicle_number))";
-            //String assigned_relation = "CREATE TABLE Assigned(permit_id INT,space_number VARCHAR(20), name VARCHAR(20), PRIMARY KEY(permit_id, space_number), FOREIGN KEY (space_number, permit_id) REFERENCES Visitor(space_number, permit_id), FOREIGN KEY (name) REFERENCES Parking_lots(name))";
-            //String made_of_relation = "CREATE TABLE made_of(space_number INT NOT NULL, zone VARCHAR(10), designated_type VARCHAR(5), name VARCHAR(20) PRIMARY KEY (name, space_number), FOREIGN KEY (name) REFERENCES Parking_Lots )";
-            this.stmt.executeUpdate(parking_lot_table);
-            this.stmt.executeUpdate(citation_table);
-            this.stmt.executeUpdate(notification_table);
-//          this.stmt.executeUpdate(vehicle_table);
-            this.stmt.executeUpdate(spaces_tables);
-            this.stmt.executeUpdate(permit_table);
-            this.stmt.executeUpdate(non_visitor_table);
-            this.stmt.executeUpdate(visitor_table);
-            //this.stmt.executeUpdate(employee_table);
-            //this.stmt.executeUpdate(student_table);
-            //this.stmt.executeUpdate(notify_relation);
-            //this.stmt.executeUpdate(issuedat_relation);
-            //this.stmt.executeUpdate(issuedto_relation);
-            //this.stmt.executeUpdate(owns1_relation);
-            //this.stmt.executeUpdate(owns2_relation);
-//            this.stmt.executeUpdate(assigned_relation);
-            //STEP 5: Extract data from result set
-//            this.stmt.execute(noti_seq);
-//            this.stmt.execute(citation_seq);
-
-        }catch(SQLException se){
-            //Handle errors for JDBC
-            se.printStackTrace();
-        }catch(Exception e){
-            //Handle errors for Class.forName
-            e.printStackTrace();
-        }finally{
-            //finally block used to close resources
-            try{
-                if(this.stmt!=null)
-                    this.stmt.close();
-            }catch(SQLException se2){
-            }// nothing we can do
-
-        }//end try
-        //System.out.println("Goodbye!");
-        System.out.println("All the tables are ready");
-    }
-
     public static void main(String[] args) throws SQLException {
 	// write your code here
         Main o = new Main();
 //        o.setupSchema();
 //        try{
 //            for (int i = 1; i <= 150; i++){
-//                String s = String.format("insert into Spaces (space_number, zone, zone_designation, address, name) values ('%s', '%s', '%s', '%s', '%s')", i, 'A', "A, B, C, D", "2105 Daniel Allen St, NC 27505", "Freedom Lot");
-//                o.stmt.executeUpdate(s);
+//                String zone[] = {"A", "B", "C", "D"};
+//
+//                String s = String.format("insert into Spaces (space_number, zone, zone_designation, address, name) values ('%s', '%s', '%s', '%s', '%s');", i, zone[i/40], "A, B, C, D", "2105 Daniel Allen St, NC 27505", "Freedom Lot");
+//                System.out.println(s);
+////                o.stmt.executeUpdate(s);
 //            }
 //            for (int i = 1; i <= 175; i++){
-//                String s = String.format("insert into Spaces (space_number, zone, zone_designation, address, name) values ('%s', '%s', '%s', '%s', '%s')", i, 'A', "AS, BS, CS,DS, V" ,"2704 Ben Clark St, NC 26701","Justice Lot");
-//                o.stmt.executeUpdate(s);
+//                String zone[] = {"AS", "BS", "CS", "DS", "DS", "V"};
+//                String s = String.format("insert into Spaces (space_number, zone, zone_designation, address, name) values ('%s', '%s', '%s', '%s', '%s');", i, zone[i/35], "AS, BS, CS,DS, V" ,"2704 Ben Clark St, NC 26701","Justice Lot");
+//                if(i > 150)
+//                {
+//                    s = String.format("insert into Spaces (space_number, zone, zone_designation, address, name) values ('%s', '%s', '%s', '%s', '%s');", i, 'V', "AS, BS, CS,DS, V" ,"2704 Ben Clark St, NC 26701","Justice Lot");
+//                    if ( i > 150 && i < 156)
+//                    {
+//                        s = String.format("insert into Spaces (space_number, zone, zone_designation, address, name, designated_type) values ('%s', '%s', '%s', '%s', '%s', '%s');", i, 'V', "AS, BS, CS,DS, V" ,"2704 Ben Clark St, NC 26701","Justice Lot", "handicapped");
+//                    }
+//                    if ( i > 171 )
+//                    {
+//                        s = String.format("insert into Spaces (space_number, zone, zone_designation, address, name, designated_type) values ('%s', '%s', '%s', '%s', '%s', '%s');", i, 'V', "AS, BS, CS,DS, V" ,"2704 Ben Clark St, NC 26701","Justice Lot", "electric");
+//                    }
+//
+//                }
+//                System.out.println(s);
+////                o.stmt.executeUpdate(s);
 //            }
 //                for (int i = 1; i <= 200; i++){
-//                String s = String.format("insert into Spaces (space_number, zone, zone_designation, address, name) values ('%s', '%s', '%s', '%s', '%s')", i, 'A', "A, B, C, D, AS, BS, CS, DS, V", "2108 McKent St, NC 27507","Premiere Lot");
+//                                    String zone[] = {"A","B","C","D","AS", "BS", "CS", "DS", "DS"};
+//                String s = String.format("insert into Spaces (space_number, zone, zone_designation, address, name) values ('%s', '%s', '%s', '%s', '%s');", i, zone[i/25], "A, B, C, D, AS, BS, CS, DS, V", "2108 McKent St, NC 27507","Premiere Lot");
+//                if (i==200){
+//                    s = String.format("insert into Spaces (space_number, zone, zone_designation, address, name) values ('%s', '%s', '%s', '%s', '%s');", i, 'V', "A, B, C, D, AS, BS, CS, DS, V", "2108 McKent St, NC 27507","Premiere Lot");
+//                }
+//                System.out.println(s);
 //                o.stmt.executeUpdate(s);
 //            }
 //
