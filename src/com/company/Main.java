@@ -24,6 +24,7 @@ public class Main {
     public Statement stmt = null;
     public Connection conn = null;
     public static String permitId = null;
+    public static String univId = null;
     public static Scanner in = new Scanner(System.in);
 
     public Main() {
@@ -51,8 +52,8 @@ public class Main {
     }
     public void loginEmployee(int u){
         System.out.println("Enter your univid");
-        String uni = in.nextLine();
-        if (this.login(uni, "E")) {
+        univId = in.nextLine();
+        if (this.login(univId, "E")) {
             this.employeeFunction();
         }
     }
@@ -92,8 +93,8 @@ public class Main {
 
     public void loginStudent(int u){
         System.out.println("Enter your univid");
-        String uni = in.nextLine();
-        if (this.login(uni, "S")) {
+        univId = in.nextLine();
+        if (this.login(univId, "S")) {
             this.studentFunction();
         }
         else{
@@ -263,22 +264,32 @@ public class Main {
                    String car_manufacturer = in.nextLine();
                    System.out.println("Enter the model of your car: ");
                    String model = in.nextLine();
-                   System.out.println("Enter the year of your car: ");
-                   int year = in.nextInt();
                    System.out.println("Enter the color of your car: ");
                    String color = in.nextLine();
                    System.out.println("Enter the vehicle number of your car: ");
                    String vehicleNumber = in.nextLine();
+                   System.out.println("Enter the year of your car: ");
+                   String year = in.nextLine();
                    rs = this.stmt.executeQuery("SELECT * FROM Permit WHERE permit_id LIKE '" + permitId + "'");
                    if (rs.next()) {
                        String zone = rs.getString("zone");
-                       String start_date = rs.getString("start_date");
+                       java.sql.Date start_date = rs.getDate("start_date");
                        String space_type = rs.getString("space_type");
-                       String expiry_date = rs.getString("expiry_date");
+                       java.sql.Date expiry_date = rs.getDate("expiry_date");
                        String expiry_time = rs.getString("expiry_time");
-                       this.stmt.executeUpdate("INSERT INTO Permit VALUES(" + permitId + "," + zone + ","
-                               + start_date + "," + space_type + "," + expiry_date + "," + expiry_time + ","
-                               + car_manufacturer + "," + model + "," + year + "," + color + "," + vehicleNumber + ")");
+
+                       String insert = String.format("INSERT INTO Permit Values('%s','%s',TO_DATE('%s','YYYY-MM-DD'),'%s',TO_DATE('%s','YYYY-MM-DD'),TO_TIMESTAMP('%s 23:59:00', 'YYYY-MM-DD HH24:MI:SS'),'%s','%s','%s','%s','%s')"
+                               , permitId, zone, start_date, space_type, expiry_date, expiry_date, car_manufacturer, model, year, color, vehicleNumber);
+                       System.out.println(insert);
+                       this.stmt.executeUpdate(insert);
+
+//                       this.stmt.executeUpdate("INSERT INTO Permit VALUES(" + permitId + "," + zone + ","
+//                               + start_date + "," + space_type + "," + expiry_date + "," + expiry_time + ","
+//                               + car_manufacturer + "," + model + "," + year + "," + color + "," + vehicleNumber + ")");
+
+                       String s = String.format("INSERT INTO Non_Visitor Values('%s','%s','%s','%s')", univId, permitId, vehicleNumber, 'E');
+                       System.out.println(s);
+                       this.stmt.executeUpdate(s);
                    }
                } else {
                    System.out.println("The user already has 2 cars. Please remove one before adding any more.");
@@ -463,7 +474,7 @@ public class Main {
             String permit = this.generatePermitID(zone);
             System.out.println("Enter color of the vehicle");
             String color = in.nextLine();
-            System.out.println("Enter modla of the vehicle");
+            System.out.println("Enter model of the vehicle");
             String model = in.nextLine();
             System.out.println("Enter year of the vehicle");
             String year = in.nextLine();
