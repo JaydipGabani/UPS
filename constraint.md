@@ -62,7 +62,7 @@ Constraint not implemented as part of table and implemented in final design
   - Implemented as a trigger before insertion on Permit, visitor and non visitor table which checks number of entry present in the table for a single permit for that student or visitor, and if the row is present then do not carry out the insert operation.
   - Reason: oracle sql does not allow nested queries in check constraint to implement the same
   
-- Employee can have up to two vehicle per single permit not more than two vehicles: 
+- Employee can have up to two vehicles per single permit not more than two vehicles: 
   - Implemented through a trigger before insert on Permit and non visitor table to check number of entries present in the table for a single permit for that employee, and if there are two rows present then do not carry out the insert operation.
   - Reason: oracle sql does not allow nested queries in check constraint to implement the same 
   
