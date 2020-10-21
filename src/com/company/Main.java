@@ -469,9 +469,10 @@ public class Main {
 
             System.out.println("Enter vehicle number");
             String li = in.nextLine();
-            System.out.println("Generated permit id is");
+
             // call generate permit id
             String permit = this.generatePermitID(zone);
+            System.out.println("Generated permit id is: " + permit);
             System.out.println("Enter color of the vehicle");
             String color = in.nextLine();
             System.out.println("Enter model of the vehicle");
@@ -492,7 +493,7 @@ public class Main {
                 end_date = start_date.plusMonths(4);
                 se = "E";
             }
-            String per = String.format("insert into Permit (permit_id, zone, start_date, space_type, expiry_date, expiry_time, car_manufacturer, model, year, color, vehicle_number) values('%s','%s',TO_DATE('%s','YYYY-MM-DD'),'%s',TO_DATE('%s','YYYY-MM-DD'),TO_TIMESTAMP('%s 23:59:00', 'YYYY-MM-DD HH24:MI:SS'),'%s','%s','%s','%s','%s','%s','%s','%s')",permit, zone, start_date, type, end_date, end_date, manu, model, year, color, li);
+            String per = String.format("insert into Permit (permit_id, zone, start_date, space_type, expiry_date, expiry_time, car_manufacturer, model, year, color, vehicle_number) values('%s','%s',TO_DATE('%s','YYYY-MM-DD'),'%s',TO_DATE('%s','YYYY-MM-DD'),TO_TIMESTAMP('%s 23:59:00', 'YYYY-MM-DD HH24:MI:SS'),'%s','%s','%s','%s','%s')",permit, zone, start_date, type, end_date, end_date, manu, model, year, color, li);
             String non = String.format("insert into Non_Visitor (unvid, permit_id, vehicle_number, S_E) values('%s','%s','%s', '%s')", univ, permit, li, se);
             this.stmt.executeUpdate(per);
             this.stmt.executeUpdate(non);
@@ -500,7 +501,7 @@ public class Main {
             e.printStackTrace();
         }
 
-        System.out.println("assignPermit");
+//        System.out.println("assignPermit");
     }
 
     private void assignTypeToSpace() {
@@ -518,7 +519,7 @@ public class Main {
 
     private void assignZoneToLot() {
 //        String name, String Designation, int numberOfSpaces, int beginNumber
-        System.out.println("assignZoneToLot");
+//        System.out.println("assignZoneToLot");
         try {
             System.out.println("Enter the name of the Lot: ");
             String name = in.nextLine();
@@ -535,26 +536,31 @@ public class Main {
             System.out.println("Enter the ending space for the new zone: ");
             int last_number = in.nextInt();
 
+            ResultSet rs = this.stmt.executeQuery(String.format("SELECT number_of_spaces FROM Parking_Lots WHERE name = '%s' and address = '%s' and zone_designation = '%s'",name ,address ,designation));
+            int number = 0;
+            if(rs.next()){
+                number = rs.getInt("number_of_spaces");
+            }
+
+            if(last_number > number) {
+                System.out.println("Not sufficient capacity for the given lot.");
+                return;
+            }
+
             String zones_update = "UPDATE Spaces SET zone = '"+newZone+"' WHERE name = '"+name+"' and address = '"+address+"' and zone_designation = '"+designation+"' and space_number = ?";
-            System.out.println(zones_update);
+//            System.out.println(zones_update);
             PreparedStatement ps = this.conn.prepareStatement(zones_update);
 
             for (int i = start_number;i<=last_number;i++) {
                 ps.setInt(1, i);
-                System.out.println(ps.toString());
+//                System.out.println(ps.toString());
                 ps.addBatch();
             }
             int[] result = ps.executeBatch();
             ps.close();
             String newDesignation = designation + ", " + newZone;
 
-            ResultSet rs = this.stmt.executeQuery(String.format("SELECT number_of_spaces FROM Parking_Lots WHERE name = '%s' and address = '%s' and zone_designation = '%s'",name ,address ,designation));
 
-            int number = 0;
-
-            if(rs.next()){
-                number = rs.getInt("number_of_spaces");
-            }
 
             String s = String.format("INSERT INTO Parking_Lots VALUES('%s', '%s', '%s', '%s')", newDesignation, address, name, number);
             this.stmt.executeUpdate(s);
@@ -705,7 +711,7 @@ public class Main {
                         System.out.println(univ);
                     }
                 }
-                System.out.println(c);
+//                System.out.println(c);
                 this.stmt.execute(c);
                 ResultSet cs = this.stmt.executeQuery("select * from Citation where citation_no = (select max(citation_no) from citation)");
                 String ci_no="";
@@ -713,7 +719,7 @@ public class Main {
                     ci_no = cs.getString("citation_no");
                 }
                 String n = String.format("insert into Notification (citation_no, PhoneNumber, univ) values ('%s','%s','%s')", ci_no, phone, univ);
-                System.out.println(n);
+//                System.out.println(n);
 //                this.stmt.execute(n);
                 System.out.println("Citation issued" + ci_no);
             }
@@ -948,7 +954,7 @@ public class Main {
             System.out.println("2. Student");
             System.out.println("3. Employee");
             System.out.println("4. Visitor");
-            System.out.println("Any other number to exit");
+            System.out.println("Any other number to exit: ");
             int u = in.nextInt();
             in.nextLine();
             switch (u){
