@@ -356,13 +356,13 @@ public class Main {
             }
         }
         else if(non_visitor.equals("S")){
-            System.out.println("Enter License Number: ");
-            String license = in.nextLine();
-            System.out.println("Enter Space Number: ");
-            String spaceNumber = in.nextLine();
+            System.out.println("Enter Permit ID: ");
+            String permit = in.nextLine();
+//            System.out.println("Enter Space Number: ");
+//            String spaceNumber = in.nextLine();
             System.out.println("Enter Zone: ");
             String zone = in.nextLine();
-            String queryStudent = String.format("SELECT permit_id FROM Non_Visitor WHERE vehicle_number = '%s' and S_E = 'S'", license);
+            String queryStudent = String.format("SELECT * FROM Non_Visitor WHERE permit_id = '%s' and S_E = 'S'", permit);
             try {
                 ResultSet rs3 = this.stmt.executeQuery(queryStudent);
                 if (!rs3.isBeforeFirst() )
@@ -511,7 +511,7 @@ public class Main {
             String address = in.nextLine();
             System.out.println("Enter the current designation of the Lot: ");
             String designation = in.nextLine();
-            System.out.println("Enter the new zone designation: ");
+            System.out.println("Enter the new zone: ");
             String newZone = in.nextLine();
 
             System.out.println("Enter the starting space for the new zone: ");
@@ -606,7 +606,7 @@ public class Main {
                 System.out.println("Enter color");
                 String color=in.nextLine();
                 String fees = "40";
-                String violation_category = "No permit";
+                String violation_category = "No Permit";
                 System.out.println("Enter name of the parking lot");
                 String name= in.nextLine();
                 System.out.println("Enter address of the parking lot");
@@ -619,7 +619,7 @@ public class Main {
                 LocalDate due=citation_date.plusDays(30);
                 String phone = "", univ = "";
                 String c = String.format("insert into Citation (citation_time, citation_date, car_license_number, violation_category, fees, Due, zone_designation, address, name, model, color) Values(TO_TIMESTAMP('%s','YYYY-MM-DD HH24:MI:SS'),To_Date('%s', 'YYYY-MM-DD'),'%s','%s','%s',TO_DATE('%s','YYYY-MM-DD'),'%s','%s','%s','%s','%s')", t, citation_date, li, violation_category, fees, due, zone, address, name, model, color);
-                System.out.println(c);
+//                System.out.println(c);
                 this.stmt.execute(c);
                 rs = this.stmt.executeQuery("select * from Citation where citation_no = (select max(citation_no) from citation)");
                 String ci_no="";
@@ -633,6 +633,7 @@ public class Main {
                 Date et = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(rs.getString("expiry_time"));
                 //Date d = new SimpleDateFormat("YYYY-MM-DD HH24:MI:SS").format(new Date());
                 String fees = "";
+                String cat = "";
                 Date d = new Date();
                 if(et.after(d)){
 //                    System.out.println(et.toString());
@@ -652,13 +653,13 @@ public class Main {
 //                    }
                     System.out.println("Permit is Invalid");
                     fees = "20";
-
+                    cat = "Invalid";
                 }
                 else
                 {
                     System.out.println("Permit expired");
                     fees = "25";
-
+                    cat = "Expired";
                 }
                 String t = new Timestamp(System.currentTimeMillis()).toString().split("\\.")[0];
                 String c = "";
@@ -668,7 +669,7 @@ public class Main {
                 String address= in.nextLine();
                 System.out.println("Enter zone designation of the parking lot");
                 String zone= in.nextLine();
-                c = String.format("insert into Citation (citation_time, citation_date, car_license_number, violation_category, fees, Due, zone_designation, address, name, model, color) Values(TO_TIMESTAMP('%s','YYYY-MM-DD HH24:MI:SS'),To_Date('%s', 'YYYY-MM-DD'),'%s','%s','%s',TO_DATE('%s','YYYY-MM-DD'),'%s','%s','%s','%s','%s')", t, LocalDate.now(), li, "Expired", fees, LocalDate.now().plusDays(30), zone, address, name, rs.getString("model"), rs.getString("color"));
+                c = String.format("insert into Citation (citation_time, citation_date, car_license_number, violation_category, fees, Due, zone_designation, address, name, model, color) Values(TO_TIMESTAMP('%s','YYYY-MM-DD HH24:MI:SS'),To_Date('%s', 'YYYY-MM-DD'),'%s','%s','%s',TO_DATE('%s','YYYY-MM-DD'),'%s','%s','%s','%s','%s')", t, LocalDate.now(), li, cat, fees, LocalDate.now().plusDays(30), zone, address, name, rs.getString("model"), rs.getString("color"));
 
                 String phone = "", univ = "";
                 System.out.println("is this visitor parking? yes/no");
@@ -879,7 +880,7 @@ public class Main {
             if(rs_permit.next()) {
                 model = rs_permit.getString("model");
                 color = rs_permit.getString("color");
-                et = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:ms").parse(rs_permit.getString("expiry_time"));
+                et = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(rs_permit.getString("expiry_time"));
             } else {
                 System.out.println("No visitor with this permit number exists.");
                 return;
