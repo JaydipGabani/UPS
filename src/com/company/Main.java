@@ -229,12 +229,6 @@ public class Main {
 //                    if (this.login(uni, "E")) {
 //                        this.changeEmpVehicleList();
 //                    }
-////                    else if (this.login(uni, "S")) {
-////                        this.changeStudentVehicleList(uni);
-////                    }
-////                    else{
-////                        System.out.println("User does not exist");
-////                    }
 //                    break;
                 case 8:
                     this.payCitation();
@@ -252,8 +246,6 @@ public class Main {
            System.out.println("Do you want to add or remove a vehicle(a/r)?: ");
            String option = in.nextLine();
            if (option.equals("a")) {
-               System.out.println(permitId);
-               System.out.println("SELECT * FROM Non_Visitor WHERE permit_id LIKE '" + permitId + "'");
                ResultSet rs = this.stmt.executeQuery("SELECT * FROM Non_Visitor WHERE permit_id LIKE '" + permitId + "'");
                int size = 0;
                while(rs.next()){
@@ -280,15 +272,9 @@ public class Main {
 
                        String insert = String.format("INSERT INTO Permit Values('%s','%s',TO_DATE('%s','YYYY-MM-DD'),'%s',TO_DATE('%s','YYYY-MM-DD'),TO_TIMESTAMP('%s 23:59:00', 'YYYY-MM-DD HH24:MI:SS'),'%s','%s','%s','%s','%s')"
                                , permitId, zone, start_date, space_type, expiry_date, expiry_date, car_manufacturer, model, year, color, vehicleNumber);
-                       System.out.println(insert);
                        this.stmt.executeUpdate(insert);
 
-//                       this.stmt.executeUpdate("INSERT INTO Permit VALUES(" + permitId + "," + zone + ","
-//                               + start_date + "," + space_type + "," + expiry_date + "," + expiry_time + ","
-//                               + car_manufacturer + "," + model + "," + year + "," + color + "," + vehicleNumber + ")");
-
                        String s = String.format("INSERT INTO Non_Visitor Values('%s','%s','%s','%s')", univId, permitId, vehicleNumber, 'E');
-                       System.out.println(s);
                        this.stmt.executeUpdate(s);
                    }
                } else {
@@ -312,7 +298,6 @@ public class Main {
                String vehicleNumber = in.nextLine();
                this.stmt.executeUpdate("DELETE FROM Permit WHERE vehicle_number LIKE '" + vehicleNumber + "'");
            }
-           System.out.println("changeEmpVehicleList");
        } catch (SQLException throwables) {
            throwables.printStackTrace();
        }
@@ -519,7 +504,6 @@ public class Main {
 
     private void assignZoneToLot() {
 //        String name, String Designation, int numberOfSpaces, int beginNumber
-//        System.out.println("assignZoneToLot");
         try {
             System.out.println("Enter the name of the Lot: ");
             String name = in.nextLine();
@@ -548,12 +532,10 @@ public class Main {
             }
 
             String zones_update = "UPDATE Spaces SET zone = '"+newZone+"' WHERE name = '"+name+"' and address = '"+address+"' and zone_designation = '"+designation+"' and space_number = ?";
-//            System.out.println(zones_update);
             PreparedStatement ps = this.conn.prepareStatement(zones_update);
 
             for (int i = start_number;i<=last_number;i++) {
                 ps.setInt(1, i);
-//                System.out.println(ps.toString());
                 ps.addBatch();
             }
             int[] result = ps.executeBatch();
@@ -578,7 +560,6 @@ public class Main {
 
     private void addLot() {
 //        String name, String address, int numberOfSpaces, String initialDesignation
-        System.out.println("addLot");
         try {
             System.out.println("Enter the name of the new lot: ");
             String name = in.nextLine();
@@ -589,11 +570,9 @@ public class Main {
             System.out.println("Enter the number of spaces in the new lot: ");
             int numberOfSpaces = in.nextInt();
             String s = String.format("INSERT INTO Parking_Lots VALUES('%s', '%s', '%s', '%s')", initialDesignation, address, name, numberOfSpaces);
-            System.out.println(s);
             this.stmt.executeUpdate(s);
 
             String spaces_insert = "INSERT INTO Spaces (space_number, zone, zone_designation, address, name) VALUES (?, ?, ?, ?, ?)";
-            System.out.println(spaces_insert);
             PreparedStatement ps = this.conn.prepareStatement(spaces_insert);
             for (int i = 1;i <= numberOfSpaces;i++) {
                 ps.setInt(1, i);
@@ -871,12 +850,40 @@ public class Main {
         try {
             System.out.println("Enter the permit number: ");
             String permit = in.nextLine();
-            ResultSet rs_permit = this.stmt.executeQuery("SELECT * FROM Permit WHERE permit_id LIKE '"+permit+"'");
-            ResultSet rs_visit = this.stmt.executeQuery("SELECT * FROM Visitor WHERE permit_id LIKE '"+permit+"'");
-            if(rs_visit.next() && rs_permit.next()) {
-                this.stmt.executeUpdate(String.format("UPDATE Spaces SET occupied = 'no' WHERE name = '%s' and zone_designation = '%s' and address = '%s' and space_number = '%s'", rs_visit.getString("name"), rs_visit.getString("zone_designation"), rs_visit.getString("address"), rs_visit.getInt("space_number")));
+            System.out.println("Enter the vehicle number: ");
+            String vehicleNo = in.nextLine();
+            ResultSet rs_visit = this.stmt.executeQuery("SELECT * FROM Visitor WHERE permit_id LIKE '"+permit+"' and vehicle_number LIKE '"+vehicleNo+"'");
+            String name = "";
+            String zone_designation = "";
+            String address = "";
+            String space_number = "";
+            String vehicle_number = "";
+            String model = "";
+            String color = "";
+            String Phone_number = "";
+            if(rs_visit.next()) {
+                name = rs_visit.getString("name");
+                zone_designation = rs_visit.getString("zone_designation");
+                address = rs_visit.getString("address");
+                space_number = rs_visit.getString("space_number");
+                vehicle_number = rs_visit.getString("vehicle_number");
+                Phone_number = rs_visit.getString("Phone_number");
+
+                this.stmt.executeUpdate(String.format("UPDATE Spaces SET occupied = 'no' WHERE name = '%s' and zone_designation = '%s' and address = '%s' and space_number = '%s'", name, zone_designation, address, space_number));
+            } else {
+                System.out.println("No visitor with this permit number exists.");
+                return;
             }
-            Date et = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:ms").parse(rs_permit.getString("expiry_time"));
+            Date et = null;
+            ResultSet rs_permit = this.stmt.executeQuery("SELECT * FROM Permit WHERE permit_id LIKE '%"+permit+"%' and vehicle_number LIKE '"+vehicleNo+"'");
+            if(rs_permit.next()) {
+                model = rs_permit.getString("model");
+                color = rs_permit.getString("color");
+                et = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:ms").parse(rs_permit.getString("expiry_time"));
+            } else {
+                System.out.println("No visitor with this permit number exists.");
+                return;
+            }
             Date now = new Date();
             String fees = "25";
             if (et.after(now)) {
@@ -885,18 +892,18 @@ public class Main {
                 System.out.println("Permit expired");
                 String t = new Timestamp(System.currentTimeMillis()).toString().split("\\.")[0];
 
-                String cite = String.format("INSERT INTO Citation (citation_time, citation_date, car_license_number, violation_category, fees, Due, zone_designation, address, name, model, color) Values(TO_TIMESTAMP('%s','YYYY-MM-DD HH24:MI:SS'),To_Date('%s', 'YYYY-MM-DD'),'%s','%s','%s',TO_DATE('%s','YYYY-MM-DD'),'%s','%s','%s','%s','%s')", t, LocalDate.now(), rs_visit.getString("vehicle_number"), "Expired", fees, LocalDate.now().plusDays(30), rs_visit.getString("zone_designation"), rs_visit.getString("address"), rs_visit.getString("name"), rs_permit.getString("model"), rs_permit.getString("color"));
-                System.out.println(cite);
+                String cite = String.format("INSERT INTO Citation (citation_time, citation_date, car_license_number, violation_category, fees, Due, zone_designation, address, name, model, color) Values(TO_TIMESTAMP('%s','YYYY-MM-DD HH24:MI:SS'),To_Date('%s', 'YYYY-MM-DD'),'%s','%s','%s',TO_DATE('%s','YYYY-MM-DD'),'%s','%s','%s','%s','%s')", t, LocalDate.now(), vehicle_number, "Expired", fees, LocalDate.now().plusDays(30), zone_designation, address, name, model, color);
+//                System.out.println(cite);
                 this.stmt.executeUpdate(cite);
-                ResultSet cs = this.stmt.executeQuery("select * from Citation where citation_no = (select max(citation_no) from citation)");
-                String ci_no="";
-                if(cs.next()){
-                    ci_no = cs.getString("citation_no");
-                }
-                String n = String.format("insert into Notification (citation_no, PhoneNumber, univ) values ('%s','%s','%s')", ci_no, rs_visit.getString("Phone_number"), "");
-                System.out.println(n);
-                this.stmt.executeUpdate(n);
-                System.out.println("Citation issued: " + ci_no);
+//                ResultSet cs = this.stmt.executeQuery("select * from Citation where citation_no = (select max(citation_no) from citation)");
+//                String ci_no="";
+//                if(cs.next()){
+//                    ci_no = cs.getString("citation_no");
+//                }
+//                String n = String.format("insert into Notification (citation_no, PhoneNumber, univ) values ('%s','%s','%s')", ci_no, Phone_number, "");
+//                System.out.println(n);
+//                this.stmt.executeUpdate(n);
+//                System.out.println("Citation issued: " + ci_no);
             }
             System.out.println("exitLot");
         } catch (SQLException | ParseException throwables) {
