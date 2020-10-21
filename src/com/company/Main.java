@@ -266,7 +266,7 @@ public class Main {
                while(rs.next()){
                    ++size;
                }
-               if(size < 1) {
+               if(size == 1) {
                    System.out.println("You have only one car with the permit. If you remove it your permit will be deleted.");
                    System.out.println("Do you want to proceed (yes/no): ");
                    String o = in.nextLine();
