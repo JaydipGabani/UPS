@@ -10,6 +10,7 @@ Constraint implemented as part of table definitions
     - Default value:
       - Occupied: no
       - designated_type: regular
+      - zone: 'A', 'B', 'C', 'D','S', 'DS','BS', 'AS','V','CS','R'
     - Allowed value:
       - Occupied: yes, no
       - designated_type: regular, electric, handicapped
@@ -21,8 +22,10 @@ Constraint implemented as part of table definitions
     - Not NULL: permit_id, vehicle_number, zone, start_date, space_type, expiry_date, car_manufacturer, mode, year, color
     - Allowed values:
       - space_type: regular, electric, handicapped
+      - zone: 'A', 'B', 'C', 'D','S', 'DS','BS', 'AS','V','CS','R'
     - Addition constraints:
       - expiry_date cannot exceed start_date + one year
+      - expiry_date cannot be less than start_date
   - Non_Visitor:
     - Primary key: permit_id, vehicle_number
     - Foreign key: REFERENCES Permit(permit_id, vehicle_number) ON DELETE CASCADE
