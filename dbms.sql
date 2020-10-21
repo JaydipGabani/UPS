@@ -10,7 +10,7 @@ CREATE TABLE Non_Visitor(unvid NUMBER(10, 0), permit_id varchar(8), vehicle_numb
 
 CREATE TABLE Visitor(permit_id varchar(8) NOT NULL , vehicle_number varchar (10) NOT NULL , Phone_number number(10,0) NOT NULL, zone_designation VARCHAR(100), address VARCHAR(50), name VARCHAR(20), space_number VARCHAR(20), PRIMARY KEY (vehicle_number, permit_id), FOREIGN KEY (permit_id, vehicle_number) REFERENCES Permit(permit_id, vehicle_number)ON DELETE CASCADE , FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE);
 
-CREATE TABLE Citation (model varchar(10) NOT NULL, color char(20) NOT NULL, citation_time TIMESTAMP(0) NOT NULL, citation_date DATE default SYSDATE NOT NULL, car_license_nunber VARCHAR(50) NOT NULL, citation_no NUMBER(10, 0) NOT NULL, violation_category VARCHAR(10) NOT NULL, constraint vio_check check(violation_category in ('Invalid', 'Expired', 'No Permit')), fees NUMBER(10, 0) NOT NULL, constraint fees_check check (fees in ('20', '25', '40')), Due DATE NOT NULL, constraint check_due check ( Due = citation_date + 30 ), status NUMBER(1,0) DEFAULT 0 NOT NULL, zone_designation VARCHAR(100) NOT NULL, address VARCHAR(50) NOT NULL, name VARCHAR(20) NOT NULL, PRIMARY KEY (citation_no), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE);
+CREATE TABLE Citation (model varchar(10) NOT NULL, color char(20) NOT NULL, citation_time TIMESTAMP(0) NOT NULL, citation_date DATE default SYSDATE NOT NULL, car_license_number VARCHAR(50) NOT NULL, citation_no NUMBER(10, 0) NOT NULL, violation_category VARCHAR(10) NOT NULL, constraint vio_check check(violation_category in ('Invalid', 'Expired', 'No Permit')), fees NUMBER(10, 0) NOT NULL, constraint fees_check check (fees in ('20', '25', '40')), Due DATE NOT NULL, constraint check_due check ( Due = citation_date + 30 ), status NUMBER(1,0) DEFAULT 0 NOT NULL, zone_designation VARCHAR(100) NOT NULL, address VARCHAR(50) NOT NULL, name VARCHAR(20) NOT NULL, PRIMARY KEY (citation_no), FOREIGN KEY (name, zone_designation, address) REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE);
 
 CREATE TABLE Notification (citation_no number(10,0) NOT NULL, NotificationNumber NUMBER(10, 0) NOT NULL, PhoneNumber NUMBER(10, 0), univ NUMBER(10,0), PRIMARY KEY (NotificationNumber), FOREIGN KEY(citation_no) REFERENCES Citation (citation_no) ON DELETE CASCADE);
 
@@ -135,7 +135,7 @@ select * from Spaces where occupied = 'yes';
 
 -- Issue citation entry
 
-INSERT INTO Citation (model, color, citation_time , citation_date , car_license_nunber , violation_category, due, fees , zone_designation , address , name) values ('S', 'black', TO_DATE('2020-10-16','YYYY-MM-DD'), TO_TIMESTAMP('2020-10-16 23:59:59', 'YYYY-MM-DD HH24:MI:SS'), '2325','Expired', TO_DATE('2020-11-16','YYYY-MM-DD'),'25', 'A/B/V', '124 test', 'test1');
+INSERT INTO Citation (model, color, citation_time , citation_date , car_license_number , violation_category, due, fees , zone_designation , address , name) values ('S', 'black', TO_DATE('2020-10-16','YYYY-MM-DD'), TO_TIMESTAMP('2020-10-16 23:59:59', 'YYYY-MM-DD HH24:MI:SS'), '2325','Expired', TO_DATE('2020-11-16','YYYY-MM-DD'),'25', 'A/B/V', '124 test', 'test1');
 
 INSERT INTO Notification (citation_no ,PhoneNumber) values ('1', '23452134');
 

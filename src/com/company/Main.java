@@ -1,6 +1,7 @@
 package com.company;
 import com.sun.nio.sctp.AbstractNotificationHandler;
 
+import javax.xml.transform.Result;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.sql.Timestamp;
@@ -86,13 +87,7 @@ public class Main {
     }
 
     public void loginUPS(int u){
-        System.out.println("Enter your univid");
-        String uni = in.nextLine();
-
-        if (this.login(uni, "E")){
-            this.upsFunctions();
-        }
-
+        this.upsFunctions();
     }
 
     public void loginStudent(int u){
@@ -210,7 +205,12 @@ public class Main {
                     this.checkNVValidParking();
                     break;
                 case 8:
-                    this.changeEmpVehicleList();
+                    System.out.println("Enter your univid");
+                    String uni = in.nextLine();
+
+                    if (this.login(uni, "E")) {
+                        this.changeEmpVehicleList();
+                    }
                     break;
                 case 9:
                     this.payCitation();
@@ -487,23 +487,37 @@ public class Main {
             System.out.println("Enter the ending space for the new zone: ");
             int last_number = in.nextInt();
 
-            String zones_update = "UPDATE spaces SET zone = '"+newZone+"' WHERE name IS LIKE '"+name+"' and address IS LIKE '"+address+"' and zone_designation IS LIKE '"+designation+"' and space_number = ?";
+            String zones_update = "UPDATE Spaces SET zone = '"+newZone+"' WHERE name = '"+name+"' and address = '"+address+"' and zone_designation = '"+designation+"' and space_number = ?";
+            System.out.println(zones_update);
             PreparedStatement ps = this.conn.prepareStatement(zones_update);
 
             for (int i = start_number;i<=last_number;i++) {
                 ps.setInt(1, i);
+                System.out.println(ps.toString());
                 ps.addBatch();
             }
             int[] result = ps.executeBatch();
             ps.close();
+            String newDesignation = designation + ", " + newZone;
 
-            String newDesignation = designation + "/" + newZone;
+            ResultSet rs = this.stmt.executeQuery(String.format("SELECT number_of_spaces FROM Parking_Lots WHERE name = '%s' and address = '%s' and zone_designation = '%s'",name ,address ,designation));
 
-            String designation_update = "UPDATE spaces SET zone_designation = '"+newDesignation+"' WHERE name IS LIKE '"+name+"' and address IS LIKE '"+address+"' and zone_designation IS LIKE '"+designation+"'";
+            int number = 0;
 
+            if(rs.next()){
+                number = rs.getInt("number_of_spaces");
+            }
+
+            String s = String.format("INSERT INTO Parking_Lots VALUES('%s', '%s', '%s', '%s')", newDesignation, address, name, number);
+            this.stmt.executeUpdate(s);
+            rs.close();
+
+            String designation_update = "UPDATE Spaces SET zone_designation = '"+newDesignation+"' WHERE name = '"+name+"' and address = '"+address+"' and zone_designation = '"+designation+"'";
             this.stmt.executeUpdate(designation_update);
 
-        } catch (Exception throwables) {
+            this.stmt.executeUpdate(String.format("DELETE FROM Parking_Lots WHERE name = '%s' and address = '%s' and zone_designation = '%s'",name ,address ,designation));
+
+        } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
     }
@@ -516,13 +530,16 @@ public class Main {
             String name = in.nextLine();
             System.out.println("Enter the address of the new lot: ");
             String address = in.nextLine();
-            System.out.println("Enter the number of spaces in the new lot: ");
-            int numberOfSpaces = in.nextInt();
             System.out.println("Enter the initial zone designation of the new lot: ");
             String initialDesignation = in.nextLine();
-            this.stmt.executeUpdate("INSERT INTO parking_lot_table VALUES("+initialDesignation+","+address+","+name+","+numberOfSpaces+","+")");
+            System.out.println("Enter the number of spaces in the new lot: ");
+            int numberOfSpaces = in.nextInt();
+            String s = String.format("INSERT INTO Parking_Lots VALUES('%s', '%s', '%s', '%s')", initialDesignation, address, name, numberOfSpaces);
+            System.out.println(s);
+            this.stmt.executeUpdate(s);
 
-            String spaces_insert = "INSERT INTO spaces_tables (space_number, zone, zone_designation, address, name) VALUES (?, ?, ?, ?, ?)";
+            String spaces_insert = "INSERT INTO Spaces (space_number, zone, zone_designation, address, name) VALUES (?, ?, ?, ?, ?)";
+            System.out.println(spaces_insert);
             PreparedStatement ps = this.conn.prepareStatement(spaces_insert);
             for (int i = 1;i <= numberOfSpaces;i++) {
                 ps.setInt(1, i);
