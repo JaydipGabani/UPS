@@ -745,7 +745,7 @@ public class Main {
 //                        System.out.println(expiry_part1);
                         //Visitor(permit_id varchar(8), vehicle_number varchar (10), Phone_number number(10,0) NOT NULL, zone_designation VARCHAR(100), address VARCHAR(50), name VARCHAR(20), space_number VARCHAR(20)
 
-                        String per = String.format("insert into Permit (permit_id, zone, start_date, space_type, expiry_date, expiry_time, car_manufacturer, model, year, color, vehicle_number) values('%s','%s',TO_DATE('%s','YYYY-MM-DD'),'%s',TO_DATE('%s','YYYY-MM-DD'),TO_TIMESTAMP('%s 23:59:00', 'YYYY-MM-DD HH24:MI:SS'),'%s','%s','%s','%s','%s','%s','%s','%s')", permitID, zone, start_date, space_type, expiry_part1, expiry_part1, car_manufacturer, model, car_manufacture_year, color, vehicle_number);
+                        String per = String.format("insert into Permit (permit_id, zone, start_date, space_type, expiry_date, expiry_time, car_manufacturer, model, year, color, vehicle_number) values('%s','%s',TO_DATE('%s','YYYY-MM-DD'),'%s',TO_DATE('%s','YYYY-MM-DD'),TO_TIMESTAMP('%s 23:59:00', 'YYYY-MM-DD HH24:MI:SS'),'%s','%s','%s','%s','%s')", permitID, zone, start_date, space_type, expiry_part1, expiry_part1, car_manufacturer, model, car_manufacture_year, color, vehicle_number);
                         this.stmt.executeUpdate(per);
                         this.stmt.executeUpdate("UPDATE Spaces SET occupied = 'yes' where space_number =" + spaceNumber);
                         String visitor_update = String.format("insert into Visitor (permit_id, vehicle_number, Phone_number, zone_designation, address, name, space_number) values('%s','%s','%s','%s','%s','%s','%s')", permitID, vehicle_number, phone_number, zoneDesignation, address, name, spaceNumber);
