@@ -195,8 +195,8 @@ public class Main {
             System.out.println("5. assignPermit");
             System.out.println("6. CheckVValidParking");
             System.out.println("7. CheckNVValidParking");
-            System.out.println("8. ChangeVehicleList");
-            System.out.println("9. PayCitation");
+//            System.out.println("8. ChangeVehicleList");
+            System.out.println("8. PayCitation");
             System.out.println("Any other number to go back");
             int u = in.nextInt();
             in.nextLine();
@@ -222,21 +222,21 @@ public class Main {
                 case 7:
                     this.checkNVValidParking();
                     break;
+//                case 8:
+//                    System.out.println("Enter your univid");
+//                    String uni = in.nextLine();
+//
+//                    if (this.login(uni, "E")) {
+//                        this.changeEmpVehicleList();
+//                    }
+////                    else if (this.login(uni, "S")) {
+////                        this.changeStudentVehicleList(uni);
+////                    }
+////                    else{
+////                        System.out.println("User does not exist");
+////                    }
+//                    break;
                 case 8:
-                    System.out.println("Enter your univid");
-                    String uni = in.nextLine();
-
-                    if (this.login(uni, "E")) {
-                        this.changeEmpVehicleList();
-                    }
-//                    else if (this.login(uni, "S")) {
-//                        this.changeStudentVehicleList(uni);
-//                    }
-//                    else{
-//                        System.out.println("User does not exist");
-//                    }
-                    break;
-                case 9:
                     this.payCitation();
                     break;
                 default:
@@ -788,7 +788,7 @@ public class Main {
             boolean flag = false;
             //String query_parkinglots = "select P.zone_designation from Parking_Lots P where P.name = `" + name + "` and P.address = `"+ address + "` and P.zone_designation LIKE '%V%'";
             String query_parkinglots = String.format("select P.zone_designation from Parking_Lots P where P.name = '%s' and P.address = '%s' and P.zone_designation LIKE ", name, address) + "'%V%'";
-            System.out.println(query_parkinglots);
+//            System.out.println(query_parkinglots);
             ResultSet rs = this.stmt.executeQuery(query_parkinglots);
             while (rs.next()) {
                 //Retrieve by column name
@@ -802,7 +802,8 @@ public class Main {
                 }
                 else{
                     while (rs1.next()) {
-                        String zone = rs1.getString("zone");
+//                        String zone = rs1.getString("zone");
+                        String zone = "V";
                         String spaceNumber = rs1.getString("space_number");
                         String permitID = generatePermitID("V");
 //                        System.out.println(permitID);
@@ -815,7 +816,7 @@ public class Main {
                         this.stmt.executeUpdate("UPDATE Spaces SET occupied = 'yes' where space_number =" + spaceNumber);
                         String visitor_update = String.format("insert into Visitor (permit_id, vehicle_number, Phone_number, zone_designation, address, name, space_number) values('%s','%s','%s','%s','%s','%s','%s')", permitID, vehicle_number, phone_number, zoneDesignation, address, name, spaceNumber);
                         this.stmt.executeUpdate(visitor_update);
-                        System.out.println("Permit Assigned, Your Space Number is: "+ spaceNumber +", and your zone is: "+ zone);
+                        System.out.println("Permit Assigned, Your Space Number is: "+ spaceNumber +", and your zone is: V");
                         flag = true;
                         break;
                     }
@@ -843,12 +844,20 @@ public class Main {
 
             }
             else {
-                this.stmt.executeUpdate("UPDATE Citation SET status = 1 where citation_no =" + ci);
+                ResultSet rs_citation = this.stmt.executeQuery("SELECT * FROM Citation WHERE status = 0 and citation_no =" +ci);
+                if(!rs_citation.next()){
+                    System.out.println("Citation already paid");
+
+                }
+                else {
+                    this.stmt.executeUpdate("UPDATE Citation SET status = 1 where citation_no =" + ci);
+                    System.out.println("Citation Paid");
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println("paycitation");
+//        System.out.println("paycitation");
     }
 
     private void exitLot() {
@@ -858,8 +867,10 @@ public class Main {
             String permit = in.nextLine();
             ResultSet rs_permit = this.stmt.executeQuery("SELECT * FROM Permit WHERE permit_id LIKE '"+permit+"'");
             ResultSet rs_visit = this.stmt.executeQuery("SELECT * FROM Visitor WHERE permit_id LIKE '"+permit+"'");
-            this.stmt.executeUpdate(String.format("UPDATE Spaces SET occupied = 'no' WHERE name = '%s' and zone_designation = '%s' and address = '%s' and space_number = '%s'", rs_visit.getString("name"), rs_visit.getString("zone_designation"), rs_visit.getString("address"), rs_visit.getInt("space_number")));
-            Date et = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(rs_permit.getString("expiry_time"));
+            if(rs_visit.next() && rs_permit.next()) {
+                this.stmt.executeUpdate(String.format("UPDATE Spaces SET occupied = 'no' WHERE name = '%s' and zone_designation = '%s' and address = '%s' and space_number = '%s'", rs_visit.getString("name"), rs_visit.getString("zone_designation"), rs_visit.getString("address"), rs_visit.getInt("space_number")));
+            }
+            Date et = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:ms").parse(rs_permit.getString("expiry_time"));
             Date now = new Date();
             String fees = "25";
             if (et.after(now)) {
