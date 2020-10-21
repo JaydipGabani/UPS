@@ -1,5 +1,4 @@
 Constraint implemented as part of table definitions
-- Non-visitor and visitor permit and vehicle_id references Primary key of Permit table
 - Constraints for columns per table:
   - Parking_Lots:
     - Primary key: name, zone_designation, address
@@ -30,13 +29,13 @@ Constraint implemented as part of table definitions
     - Default value: 
       - S_E: S
     - Not NULL: S_E
-    - Allowed values:
+    - Allowed values:- Default value:
       - S_E: S, E
   - Visitor:
     - Primary key: vehicle_number, permit_id
     - Foreign key: REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE, REFERENCES Permit(permit_id, vehicle_number)ON DELETE CASCADE
     - Not NULL: Phone_number
-  - Citation:
+  - Citation:- Default value:
     - Primary key: citation_no
     - Foreign key: REFERENCES Parking_Lots(name, zone_designation, address) ON DELETE CASCADE
     - Default value:
@@ -52,13 +51,28 @@ Constraint implemented as part of table definitions
   - Notification:
     - Primary key: NotificationNumber
     - Foreign key: REFERENCES Citation (citation_no) ON DELETE CASCADE
-    - Default value:
     - Not NULL: citation_no, NotificationNumber
-    - Allowed values:
+  
 
 Constraint not implemented as part of table and implemented in final design
-- No visitor or student can have more than one vehicle in a single permit
-- Employee can have up to two vehicle per single permit not more than that 
+- No visitor or student can have more than one vehicle in a single permit: 
+  - Implemented as a trigger before insertion on Permit, visitor and non visitor table which checks number of entry present in the table for a single permit for that student or visitor, and if the row is present then do not carry out the insert operation.
+  - Reason: oracle sql does not allow nested queries in check constraint to implement the same
+  
+- Employee can have up to two vehicle per single permit not more than two vehicles: 
+  - Implemented through a trigger before insert on Permit and non visitor table to check number of entries present in the table for a single permit for that employee, and if there are two rows present then do not carry out the insert operation.
+  - Reason: oracle sql does not allow nested queries in check constraint to implement the same 
+  
+- Set default value of due date in citation:
+  - Implemented a trigger to set due date to 30 days from citation_date on an insert in citation table.
+  - Reason: oracle sql does not allow dynamic default value constraint based on other column value.
+ 
+- Auto increment notification primary key and citation primary key
+  - Implemented a sequence, and a trigger for notificationNumber and citation_no each to auto increment value of primary keys
+  - Reason: oracle 11g do not allow `AUTO INCREMENT`.
 
 Constraint implemented as part of code
-- Default zone value for any given space from zone designation of that lot
+- Default zone value for any given space from zone designation of that lot and auto insert spaces into space table
+  - Implemented in a code:
+  - Reason: zone_designation in Parking_lots is a part of primary key, updating the same would result in referential integrity constraint for spaces table and vice versa is also true. The work-around in code is to add a lot with updated zone_designation, update respective rows of spaces table and delete old parking_lot row
+
