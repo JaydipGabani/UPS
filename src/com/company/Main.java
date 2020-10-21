@@ -96,6 +96,9 @@ public class Main {
         if (this.login(uni, "S")) {
             this.studentFunction();
         }
+        else{
+            System.out.println("Student Univeristy does not exist ");
+        }
     }
 
     private boolean login(String uni, String se) {
@@ -103,10 +106,10 @@ public class Main {
         try{
             String s = String.format("select permit_id from Non_Visitor where unvid = '%s' and S_E = '%s'", uni, se);
 //            String s = "Select * from NON_VISITOR";
-            System.out.println(s);
+//            System.out.println(s);
             ResultSet rs = this.stmt.executeQuery(s);
             if(!rs.next()){
-                System.out.println("User doesn't exists");
+//                System.out.println("User doesn't exists");
                 return false;
             }
             else {
@@ -114,7 +117,7 @@ public class Main {
 //                    System.out.println(rs.getString("permit_id") + " " + rs.getString("unvid") + " " + rs.getString("S_E"));
 //                }
                     permitId = rs.getString("permit_id");
-                    System.out.println(permitId);
+//                    System.out.println(permitId);
                     return true;
             }
         } catch (Exception e) {
@@ -125,16 +128,18 @@ public class Main {
 
     private void studentFunction() {
         while (true){
-            System.out.println("1. ChangeVehicleList");
-            System.out.println("2. PayCitation");
+//            System.out.println("1. ChangeVehicleList");
+            System.out.println("1. PayCitation");
             System.out.println("Any other number to go back");
             int u = in.nextInt();
             in.nextLine();
             switch (u){
+//                case 1:
+//                    System.out.println("Enter your univid");
+//                    String uni = in.nextLine();
+//                    this.changeStudentVehicleList(uni);
+//                    break;
                 case 1:
-                    this.changeStudentVehicleList();
-                    break;
-                case 2:
                     this.payCitation();
                     break;
                 default:
@@ -143,16 +148,28 @@ public class Main {
         }
     }
 
-    private void changeStudentVehicleList() {
+    private void changeStudentVehicleList(String uni) {
 //        String permitNumber, int univId, boolean addOrRemove, String make, String model, String year, String color, String vehicleNumber
         try {
-            System.out.println("changeStudentVehicleList");
+            String s = String.format("select permit_id from Non_Visitor where unvid = '%s' and S_E = 'S'", uni);
+            ResultSet rs = this.stmt.executeQuery(s);
+            rs.next();
+            String permitID = rs.getString("permit_id");
+
+//            System.out.println("Enter your current Permit ID: ");
+//            String permitID = in.nextLine();
+            System.out.println("Enter Car Manufacturer: ");
             String carmanufacturer = in.nextLine();
+            System.out.println("Enter Car Model: ");
             String model = in.nextLine();
+            System.out.println("Enter Car Manufacturer year: ");
             int year = in.nextInt();
+            in.nextLine();
+            System.out.println("Enter Car Color: ");
             String color = in.nextLine();
+            System.out.println("Enter Vehicle Number: ");
             String vehiclenumber = in.nextLine();
-            String query = "Update Permit P SET P.car_manufacturer = '" + carmanufacturer + "', P.model = '" + model + "', P.year = '" + year + "', P.color = '" + color + "', P.vehicle_number = '" + vehiclenumber + "' WHERE P.permit_id = '" + permitId + "'";
+            String query = "Update Permit P SET P.car_manufacturer = '" + carmanufacturer + "', P.model = '" + model + "', P.year = '" + year + "', P.color = '" + color + "', P.vehicle_number = '" + vehiclenumber + "' WHERE P.permit_id = '" + permitID + "'";
             this.stmt.executeUpdate(query);
             System.out.println("Updated the Student's Vehicle List");
         } catch (SQLException throwables) {
@@ -211,6 +228,12 @@ public class Main {
                     if (this.login(uni, "E")) {
                         this.changeEmpVehicleList();
                     }
+//                    else if (this.login(uni, "S")) {
+//                        this.changeStudentVehicleList(uni);
+//                    }
+//                    else{
+//                        System.out.println("User does not exist");
+//                    }
                     break;
                 case 9:
                     this.payCitation();
@@ -803,7 +826,14 @@ public class Main {
         try{
             System.out.println("Insert citation number");
             String ci = in.nextLine();
-            this.stmt.executeUpdate("UPDATE Citation SET status = 1 where citation_no =" + ci);
+            ResultSet rs_permit = this.stmt.executeQuery("SELECT * FROM Citation WHERE citation_no =" +ci);
+            if(!rs_permit.next()){
+                System.out.println("Citation does not exist, Enter correct citation number");
+
+            }
+            else {
+                this.stmt.executeUpdate("UPDATE Citation SET status = 1 where citation_no =" + ci);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
