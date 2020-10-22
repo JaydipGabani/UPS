@@ -16,3 +16,4 @@ Execute the following command to execute the .jar file, then follow the on-scree
 `java -jar <path to UPS.jar>`
 
 - The reporting queries are mentioned in the "sample.sql". Execute the file to see the results. 
+- The database used is OracleDB which is hosted on NCSU EOS. Currently, the connection is made using the credential of a teammate. In order to change the current database, credentials can be changed in the Java code.
